@@ -51,7 +51,7 @@ const FALLBACK_CURRENCIES: Currency[] = [
 ];
 
 const POPULAR_CODES = ["THB", "JPY", "USD", "VND", "EUR", "TWD"];
-const KEYPAD: KeypadKey[] = ["7", "8", "9", "4", "5", "6", "1", "2", "3", ".", "0", "00"];
+const KEYPAD: KeypadKey[] = ["1", "2", "3", "4", "5", "6", "7", "8", "9", ".", "0", "00"];
 
 const displayNames =
   typeof Intl.DisplayNames === "function"
@@ -93,7 +93,7 @@ function rateKey(base: string, quote: string) {
 function applyTheme(theme: Theme) {
   document.documentElement.dataset.theme = theme;
   document.documentElement.style.colorScheme = theme;
-  document.querySelector('meta[name="theme-color"]')?.setAttribute("content", theme === "dark" ? "#000000" : "#f5f5f7");
+  document.querySelector('meta[name="theme-color"]')?.setAttribute("content", theme === "dark" ? "#050608" : "#f1f2f6");
 }
 
 function formatMoney(value: number | null, currency: string): string {
@@ -214,7 +214,7 @@ export default function HowmuApp() {
     const savedTheme = localStorage.getItem(THEME_KEY);
     const initialTheme: Theme = savedTheme === "light" || savedTheme === "dark"
       ? savedTheme
-      : window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+      : "dark";
     applyTheme(initialTheme);
 
     queueMicrotask(() => {
@@ -442,52 +442,56 @@ export default function HowmuApp() {
       <header className="app-header">
         <Brand />
         <div className="header-actions">
-          <span className="header-caption">결제하기 전에, 얼마인지부터.</span>
+          <span className="header-caption">환율 계산기</span>
           <ThemeToggle theme={theme} onToggle={toggleTheme} />
         </div>
       </header>
 
-      <section className="currency-switcher" aria-label="통화 설정">
-        <button type="button" onClick={() => openPicker("travel")}>
-          <span>여행지 통화</span>
-          <strong>{travelCurrency.iso_code}</strong>
-          <small>{currencyName(travelCurrency)}</small>
-        </button>
-        <button
-          className="swap-button"
-          type="button"
-          aria-label="두 통화 교환"
-          onClick={() => {
-            setTravel(home);
-            setHome(travel);
-            setAmount("");
-          }}
-        >
-          ⇄
-        </button>
-        <button type="button" onClick={() => openPicker("home")}>
-          <span>내 기준 통화</span>
-          <strong>{homeCurrency.iso_code}</strong>
-          <small>{currencyName(homeCurrency)}</small>
-        </button>
-      </section>
+      <section className="exchange-card" aria-label="통화 설정" aria-live="polite">
+        <div className="currency-row">
+          <button className="currency-select" type="button" onClick={() => openPicker("travel")}>
+            <span className="currency-badge" aria-hidden="true">{travelCurrency.symbol || travelCurrency.iso_code.slice(0, 1)}</span>
+            <span className="currency-label">
+              <strong>{travelCurrency.iso_code}</strong>
+              <small>{currencyName(travelCurrency)}</small>
+            </span>
+            <span className="chevron" aria-hidden="true">⌄</span>
+          </button>
+          <div className={`amount-value ${amount.length > 9 ? "amount-small" : ""}`}>
+            {formatInput(amount)}
+          </div>
+        </div>
 
-      <section className="converter-card" aria-live="polite">
-        <div className="amount-header">
-          <span>{travelCurrency.symbol || travelCurrency.iso_code}</span>
-          <button type="button" onClick={() => pressKey("clear")} disabled={!amount}>전체 지우기</button>
+        <div className="exchange-divider">
+          <span />
+          <button
+            className="swap-button"
+            type="button"
+            aria-label="두 통화 교환"
+            onClick={() => {
+              setTravel(home);
+              setHome(travel);
+              setAmount("");
+            }}
+          >
+            ⇅
+          </button>
+          <span />
         </div>
-        <div className={`amount-value ${amount.length > 9 ? "amount-small" : ""}`}>
-          {formatInput(amount)}
-        </div>
-        <div className="conversion-result">
-          <span>원화로 약</span>
-          <strong>{formatMoney(converted, home)}</strong>
-          {rate ? (
-            <small>1 {travel} ≈ {formatRate(rate.rate, home)}</small>
-          ) : (
-            <small>환율을 받으면 바로 계산할게요.</small>
-          )}
+
+        <div className="currency-row">
+          <button className="currency-select" type="button" onClick={() => openPicker("home")}>
+            <span className="currency-badge currency-badge-home" aria-hidden="true">{homeCurrency.symbol || homeCurrency.iso_code.slice(0, 1)}</span>
+            <span className="currency-label">
+              <strong>{homeCurrency.iso_code}</strong>
+              <small>{currencyName(homeCurrency)}</small>
+            </span>
+            <span className="chevron" aria-hidden="true">⌄</span>
+          </button>
+          <div className="conversion-result">
+            <strong>{formatMoney(converted, home)}</strong>
+            <small>{rate ? `1 ${travel} ≈ ${formatRate(rate.rate, home)}` : "환율을 불러오는 중"}</small>
+          </div>
         </div>
       </section>
 
@@ -496,10 +500,13 @@ export default function HowmuApp() {
         {rateStatus}
       </div>
 
-      <section className="keypad" aria-label="숫자 패드">
+      <section className="keypad keypad-card" aria-label="숫자 패드">
         <div className="keypad-topline">
-          <span>현지 가격을 입력하세요</span>
-          <button type="button" onClick={() => pressKey("backspace")} disabled={!amount} aria-label="한 자리 삭제">⌫</button>
+          <span>현지 가격</span>
+          <div>
+            <button type="button" onClick={() => pressKey("backspace")} disabled={!amount} aria-label="한 자리 삭제">삭제</button>
+            <button type="button" onClick={() => pressKey("clear")} disabled={!amount}>초기화</button>
+          </div>
         </div>
         <div className="key-grid">
           {KEYPAD.map((key) => (

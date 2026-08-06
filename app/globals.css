@@ -1,40 +1,31 @@
 :root {
-  --action: #0066cc;
-  --action-focus: #0071e3;
-  --action-dark: #2997ff;
-  --ink: #1d1d1f;
-  --ink-soft: #333333;
-  --muted: #7a7a7a;
-  --hairline: #e0e0e0;
-  --divider: #f0f0f0;
-  --canvas: #ffffff;
-  --parchment: #f5f5f7;
-  --pearl: #fafafc;
-  --tile: #272729;
-  --tile-soft: #2a2a2c;
-  --chip: rgba(210, 210, 215, 0.64);
-  --control-border: rgba(0, 0, 0, 0.08);
-  --pressed: rgba(0, 0, 0, 0.035);
-  --key-pressed: #e8e8ed;
-  --sheet: rgba(245, 245, 247, 0.94);
+  --action: #357ff3;
+  --action-soft: #e7f0ff;
+  --ink: #17181d;
+  --muted: #767983;
+  --canvas: #f1f2f6;
+  --surface: #ffffff;
+  --surface-soft: #f7f7fa;
+  --chip: #eceef3;
+  --line: rgba(20, 24, 32, 0.08);
+  --pressed: #e7e9ef;
+  --sheet: rgba(247, 247, 250, 0.96);
+  --shadow: 0 12px 32px rgba(27, 31, 40, 0.10);
 }
 
 :root[data-theme="dark"] {
-  --ink: #f5f5f7;
-  --ink-soft: #e5e5ea;
-  --muted: #a1a1a6;
-  --hairline: #38383a;
-  --divider: #2c2c2e;
-  --canvas: #1c1c1e;
-  --parchment: #000000;
-  --pearl: #242426;
-  --tile: #000000;
-  --tile-soft: #1c1c1e;
-  --chip: rgba(99, 99, 102, 0.64);
-  --control-border: rgba(255, 255, 255, 0.12);
-  --pressed: rgba(255, 255, 255, 0.08);
-  --key-pressed: #2c2c2e;
-  --sheet: rgba(28, 28, 30, 0.94);
+  --action: #3b86f7;
+  --action-soft: #1c365e;
+  --ink: #f1f2f6;
+  --muted: #9a9da7;
+  --canvas: #050608;
+  --surface: #17181e;
+  --surface-soft: #1d1e24;
+  --chip: #25272f;
+  --line: rgba(255, 255, 255, 0.07);
+  --pressed: #24262d;
+  --sheet: rgba(23, 24, 30, 0.96);
+  --shadow: 0 14px 34px rgba(0, 0, 0, 0.42);
 }
 
 * {
@@ -45,12 +36,12 @@ html,
 body {
   min-height: 100%;
   margin: 0;
-  background: var(--parchment);
+  background: var(--canvas);
   color: var(--ink);
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Apple SD Gothic Neo", sans-serif;
   font-size: 17px;
   font-weight: 400;
-  line-height: 1.47;
+  line-height: 1.45;
   letter-spacing: -0.022em;
   -webkit-font-smoothing: antialiased;
 }
@@ -67,17 +58,17 @@ button {
 }
 
 button:active:not(:disabled) {
-  transform: scale(0.95);
+  transform: scale(0.96);
 }
 
 button:focus-visible,
 input:focus-visible {
-  outline: 2px solid var(--action-focus);
+  outline: 2px solid var(--action);
   outline-offset: 2px;
 }
 
 button:disabled {
-  opacity: 0.32;
+  opacity: 0.3;
 }
 
 .app-shell {
@@ -95,23 +86,20 @@ button:disabled {
   color: var(--ink);
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
   font-size: 24px;
-  font-weight: 600;
-  letter-spacing: -0.035em;
+  font-weight: 700;
+  letter-spacing: -0.045em;
   line-height: 1;
 }
 
 .brand b {
-  width: auto;
-  height: auto;
   margin-left: 1px;
-  background: transparent;
   color: var(--action);
   font-size: inherit;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .loading-shell {
-  padding: max(24px, env(safe-area-inset-top)) 20px;
+  padding: max(22px, env(safe-area-inset-top)) 20px;
 }
 
 .loading-mark {
@@ -123,27 +111,27 @@ button:disabled {
   height: 72px;
   transform: translate(-50%, -50%);
   place-items: center;
-  border-radius: 50%;
-  background: var(--action);
-  color: white;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
+  border-radius: 24px;
+  background: var(--surface);
+  color: var(--action);
+  box-shadow: var(--shadow);
   font-size: 42px;
-  font-weight: 600;
+  font-weight: 700;
   animation: breathe 1.2s ease-in-out infinite alternate;
 }
 
 @keyframes breathe {
-  to { transform: translate(-50%, -50%) scale(0.96); opacity: 0.86; }
+  to { transform: translate(-50%, -50%) scale(0.96); opacity: 0.82; }
 }
 
 .onboarding-shell {
-  padding: max(20px, env(safe-area-inset-top)) 20px max(20px, env(safe-area-inset-bottom));
+  padding: max(18px, env(safe-area-inset-top)) 20px max(20px, env(safe-area-inset-bottom));
 }
 
 .onboarding-header,
 .app-header {
   display: flex;
-  min-height: 44px;
+  min-height: 52px;
   align-items: center;
   justify-content: space-between;
 }
@@ -160,71 +148,72 @@ button:disabled {
   height: 44px;
   flex: 0 0 44px;
   place-items: center;
-  border: 1px solid var(--control-border);
-  border-radius: 50%;
-  background: var(--parchment);
+  border: 0;
+  border-radius: 16px;
+  background: var(--surface);
   color: var(--ink);
-  font-size: 22px;
+  box-shadow: var(--shadow);
+  font-size: 21px;
   line-height: 1;
   transition: transform 120ms ease, background-color 180ms ease, color 180ms ease;
 }
 
-.onboarding-header p {
+.onboarding-header p,
+.header-caption {
   margin: 0;
+  padding: 9px 12px;
+  border-radius: 13px;
+  background: var(--surface);
   color: var(--muted);
   font-size: 12px;
-  letter-spacing: -0.01em;
+  font-weight: 600;
 }
 
 .onboarding-intro {
-  padding: 48px 4px 44px;
-  text-align: center;
+  padding: 50px 6px 42px;
+  text-align: left;
 }
 
 .eyebrow {
   display: inline-block;
-  margin-bottom: 12px;
+  margin-bottom: 14px;
   color: var(--action);
   font-size: 14px;
-  font-weight: 600;
-  letter-spacing: -0.01em;
+  font-weight: 700;
 }
 
 .onboarding-intro h1 {
   margin: 0;
-  color: var(--ink);
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
-  font-size: clamp(34px, 10vw, 40px);
-  font-weight: 600;
-  letter-spacing: -0.035em;
-  line-height: 1.1;
+  font-size: clamp(36px, 10vw, 43px);
+  font-weight: 700;
+  letter-spacing: -0.05em;
+  line-height: 1.08;
 }
 
 .onboarding-intro p {
   margin: 20px 0 0;
   color: var(--muted);
-  font-size: 17px;
-  line-height: 1.47;
+  font-size: 16px;
+  line-height: 1.55;
 }
 
 .setup-card {
-  margin: 0 -20px -20px;
-  padding: 24px 20px max(16px, env(safe-area-inset-bottom));
-  border: 0;
-  border-radius: 0;
-  background: var(--parchment);
+  padding: 20px;
+  border-radius: 28px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
 }
 
 .setup-title-row {
   display: flex;
-  min-height: 72px;
+  min-height: 70px;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 17px;
-  padding: 12px 17px;
-  border: 1px solid var(--control-border);
-  border-radius: 18px;
-  background: var(--canvas);
+  margin-bottom: 16px;
+  padding: 12px 16px;
+  border-radius: 20px;
+  background: var(--surface-soft);
 }
 
 .setup-title-row div {
@@ -232,49 +221,46 @@ button:disabled {
   gap: 2px;
 }
 
+.setup-title-row span,
+.setup-title-row strong {
+  font-size: 13px;
+}
+
 .setup-title-row span {
   color: var(--muted);
-  font-size: 12px;
 }
 
 .setup-title-row strong {
   font-size: 17px;
-  font-weight: 600;
 }
 
 .setup-title-row b {
-  min-width: 60px;
   padding: 8px 14px;
   border-radius: 9999px;
   background: var(--action);
   color: white;
   font-size: 14px;
-  font-weight: 400;
-  text-align: center;
 }
 
 .setup-card h2 {
-  margin: 24px 4px 8px;
+  margin: 22px 4px 8px;
   font-size: 14px;
-  font-weight: 600;
-  letter-spacing: -0.014em;
 }
 
 .search-box {
   display: flex;
-  height: 48px;
+  height: 50px;
   align-items: center;
-  gap: 8px;
-  padding: 0 17px;
-  border: 1px solid var(--control-border);
-  border-radius: 9999px;
-  background: var(--canvas);
+  gap: 9px;
+  padding: 0 16px;
+  border: 1px solid var(--line);
+  border-radius: 17px;
+  background: var(--surface-soft);
 }
 
 .search-box span {
   color: var(--muted);
   font-size: 20px;
-  line-height: 1;
 }
 
 .search-box input {
@@ -283,12 +269,11 @@ button:disabled {
   outline: 0;
   background: transparent;
   color: var(--ink);
-  font-size: 17px;
-  letter-spacing: -0.022em;
+  font-size: 16px;
 }
 
 .search-box input::placeholder {
-  color: #8e8e93;
+  color: var(--muted);
 }
 
 .currency-list {
@@ -301,12 +286,12 @@ button:disabled {
 .currency-option {
   display: grid;
   min-height: 68px;
-  grid-template-columns: 40px minmax(0, 1fr) auto;
+  grid-template-columns: 42px minmax(0, 1fr) auto;
   align-items: center;
   gap: 12px;
   padding: 8px 4px;
   border: 0;
-  border-bottom: 1px solid var(--hairline);
+  border-bottom: 1px solid var(--line);
   background: transparent;
   text-align: left;
   transition: transform 120ms ease, background-color 120ms ease;
@@ -318,14 +303,14 @@ button:disabled {
 
 .currency-symbol {
   display: grid;
-  width: 40px;
-  height: 40px;
+  width: 42px;
+  height: 42px;
   place-items: center;
   border-radius: 50%;
-  background: var(--canvas);
-  color: var(--ink);
+  background: var(--action-soft);
+  color: var(--action);
   font-size: 15px;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .currency-copy {
@@ -334,27 +319,25 @@ button:disabled {
   gap: 1px;
 }
 
-.currency-copy strong {
+.currency-copy strong,
+.currency-copy small {
   overflow: hidden;
-  font-size: 15px;
-  font-weight: 600;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
+.currency-copy strong {
+  font-size: 15px;
+}
+
 .currency-copy small {
-  overflow: hidden;
   color: var(--muted);
   font-size: 12px;
-  letter-spacing: -0.01em;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .currency-option > b {
   color: var(--action);
   font-size: 14px;
-  font-weight: 400;
 }
 
 .empty-search {
@@ -368,181 +351,184 @@ button:disabled {
   display: flex;
   min-height: 100dvh;
   flex-direction: column;
-  padding: max(16px, env(safe-area-inset-top)) 18px max(12px, env(safe-area-inset-bottom));
+  gap: 12px;
+  padding: max(14px, env(safe-area-inset-top)) 18px max(14px, env(safe-area-inset-bottom));
 }
 
-.header-caption {
-  max-width: 150px;
-  color: var(--muted);
-  font-size: 12px;
-  line-height: 1.3;
-  letter-spacing: -0.01em;
-  text-align: right;
+.exchange-card {
+  padding: 16px 18px;
+  border: 1px solid var(--line);
+  border-radius: 28px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
 }
 
-.currency-switcher {
+.currency-row {
   display: grid;
-  grid-template-columns: 1fr 44px 1fr;
+  min-height: 72px;
+  grid-template-columns: minmax(0, 1fr) minmax(128px, 46%);
   align-items: center;
-  gap: 4px;
-  margin: 12px 0;
-  padding: 4px;
-  border: 1px solid var(--control-border);
-  border-radius: 18px;
-  background: var(--parchment);
+  gap: 8px;
 }
 
-.currency-switcher > button:not(.swap-button) {
+.currency-select {
+  display: flex;
+  min-width: 0;
+  min-height: 56px;
+  align-items: center;
+  gap: 11px;
+  padding: 4px 0;
+  border: 0;
+  background: transparent;
+  text-align: left;
+}
+
+.currency-badge {
+  display: grid;
+  width: 48px;
+  height: 48px;
+  flex: 0 0 48px;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--action);
+  color: white;
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.currency-badge-home {
+  background: var(--chip);
+  color: var(--ink);
+}
+
+.currency-label {
   display: grid;
   min-width: 0;
-  min-height: 64px;
-  align-content: center;
   gap: 1px;
-  padding: 6px 10px;
-  border: 0;
-  border-radius: 14px;
-  background: var(--canvas);
-  text-align: left;
-  transition: transform 120ms ease;
 }
 
-.currency-switcher span,
-.currency-switcher small {
+.currency-label strong {
+  font-size: 20px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+
+.currency-label small {
   overflow: hidden;
   color: var(--muted);
-  font-size: 10px;
-  letter-spacing: -0.006em;
+  font-size: 11px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.currency-switcher strong {
-  font-size: 17px;
-  font-weight: 600;
-  letter-spacing: -0.022em;
+.chevron {
+  margin-left: auto;
+  color: var(--muted);
+  font-size: 18px;
+}
+
+.amount-value,
+.conversion-result strong {
+  overflow: hidden;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.amount-value {
+  color: var(--action);
+  font-size: clamp(30px, 8vw, 36px);
+  font-weight: 650;
+  letter-spacing: -0.045em;
+}
+
+.amount-value.amount-small {
+  font-size: 27px;
+}
+
+.exchange-divider {
+  display: grid;
+  grid-template-columns: 1fr 40px 1fr;
+  align-items: center;
+  gap: 10px;
+}
+
+.exchange-divider > span {
+  height: 1px;
+  background: var(--line);
 }
 
 .swap-button {
   display: grid;
-  width: 44px;
-  height: 44px;
+  width: 40px;
+  height: 40px;
   place-items: center;
   border: 0;
-  border-radius: 50%;
-  background: var(--action);
-  color: white;
-  font-size: 19px;
-  font-weight: 400;
+  border-radius: 14px;
+  background: var(--chip);
+  color: var(--action);
+  font-size: 20px;
   transition: transform 120ms ease;
-}
-
-.converter-card {
-  margin-inline: -18px;
-  overflow: hidden;
-  border-radius: 0;
-  background: var(--tile);
-  color: white;
-}
-
-.amount-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 20px 24px 4px;
-}
-
-.amount-header > span {
-  color: var(--action-dark);
-  font-size: 17px;
-  font-weight: 600;
-}
-
-.amount-header button {
-  min-height: 36px;
-  padding: 0 4px;
-  border: 0;
-  background: transparent;
-  color: var(--action-dark);
-  font-size: 14px;
-}
-
-.amount-value {
-  overflow: hidden;
-  padding: 4px 24px 24px;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
-  font-size: clamp(48px, 14vw, 60px);
-  font-weight: 300;
-  font-variant-numeric: tabular-nums;
-  letter-spacing: -0.04em;
-  line-height: 1.07;
-  text-align: right;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.amount-value.amount-small {
-  font-size: clamp(38px, 11vw, 50px);
 }
 
 .conversion-result {
   display: grid;
-  min-height: 112px;
-  align-content: center;
+  min-width: 0;
   gap: 2px;
-  padding: 17px 24px 20px;
-  border-top: 1px solid rgba(255, 255, 255, 0.12);
-  background: var(--tile-soft);
-  color: white;
-}
-
-.conversion-result span {
-  color: #cccccc;
-  font-size: 12px;
+  text-align: right;
 }
 
 .conversion-result strong {
+  font-size: clamp(23px, 6vw, 29px);
+  font-weight: 650;
+  letter-spacing: -0.04em;
+}
+
+.conversion-result small {
   overflow: hidden;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
-  font-size: clamp(34px, 10vw, 42px);
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-  letter-spacing: -0.035em;
-  line-height: 1.12;
+  color: var(--muted);
+  font-size: 10px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.conversion-result small {
-  color: var(--action-dark);
-  font-size: 12px;
-  letter-spacing: -0.01em;
-}
-
 .rate-status {
   display: flex;
-  min-height: 36px;
+  min-height: 28px;
   align-items: center;
   justify-content: center;
   gap: 7px;
   color: var(--muted);
   font-size: 11px;
-  letter-spacing: -0.008em;
 }
 
 .status-dot {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: #34c759;
+  background: #30d158;
 }
 
 .rate-stale .status-dot {
-  background: #ff9500;
+  background: #ff9f0a;
 }
 
 .keypad {
-  margin-top: auto;
-  padding-top: 4px;
+  margin-top: 0;
+}
+
+.keypad-card {
+  display: flex;
+  min-height: 358px;
+  flex: 1;
+  flex-direction: column;
+  padding: 16px 18px 20px;
+  border: 1px solid var(--line);
+  border-radius: 28px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
 }
 
 .keypad-topline {
@@ -550,46 +536,54 @@ button:disabled {
   min-height: 44px;
   align-items: center;
   justify-content: space-between;
-  padding: 0 4px 4px;
+  padding: 0 4px;
 }
 
-.keypad-topline span {
+.keypad-topline > span {
   color: var(--muted);
   font-size: 12px;
 }
 
+.keypad-topline > div {
+  display: flex;
+  gap: 4px;
+}
+
 .keypad-topline button {
-  width: 44px;
-  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 8px;
   border: 0;
-  border-radius: 50%;
-  background: var(--chip);
+  background: transparent;
   color: var(--action);
-  font-size: 20px;
+  font-size: 12px;
   transition: transform 120ms ease;
 }
 
 .key-grid {
   display: grid;
+  flex: 1;
   grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
+  grid-template-rows: repeat(4, 1fr);
+  gap: 4px;
 }
 
 .key-grid button {
-  min-height: clamp(52px, 7.5dvh, 62px);
+  min-height: 62px;
   border: 0;
   border-radius: 18px;
-  background: var(--parchment);
+  background: transparent;
   color: var(--ink);
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
-  font-size: 24px;
-  font-weight: 400;
+  font-size: clamp(30px, 8vw, 38px);
+  font-weight: 350;
   font-variant-numeric: tabular-nums;
-  transition: transform 120ms ease, background-color 120ms ease;
+  transition: transform 120ms ease, background-color 120ms ease, color 120ms ease;
 }
 
 .key-grid button:active {
-  background: var(--key-pressed);
+  background: var(--pressed);
+  color: var(--action);
 }
 
 .sheet-backdrop {
@@ -599,9 +593,9 @@ button:disabled {
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  background: rgba(0, 0, 0, 0.32);
-  backdrop-filter: saturate(180%) blur(20px);
-  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  background: rgba(0, 0, 0, 0.58);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
 }
 
 .sheet-dismiss {
@@ -618,8 +612,10 @@ button:disabled {
   max-height: min(760px, 91dvh);
   padding: 10px 20px max(16px, env(safe-area-inset-bottom));
   overflow: hidden;
-  border-radius: 18px 18px 0 0;
+  border: 1px solid var(--line);
+  border-radius: 28px 28px 0 0;
   background: var(--sheet);
+  box-shadow: var(--shadow);
   animation: rise 180ms ease-out;
 }
 
@@ -628,18 +624,19 @@ button:disabled {
 }
 
 .sheet-handle {
-  width: 36px;
+  width: 38px;
   height: 5px;
-  margin: 0 auto 17px;
+  margin: 0 auto 18px;
   border-radius: 9999px;
-  background: #c7c7cc;
+  background: var(--muted);
+  opacity: 0.55;
 }
 
 .currency-sheet header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  margin-bottom: 17px;
+  margin-bottom: 16px;
 }
 
 .currency-sheet header span {
@@ -649,10 +646,8 @@ button:disabled {
 
 .currency-sheet h2 {
   margin: 4px 0 0;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
   font-size: 28px;
-  font-weight: 600;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.04em;
   line-height: 1.14;
 }
 
@@ -662,16 +657,10 @@ button:disabled {
   height: 44px;
   place-items: center;
   border: 0;
-  border-radius: 50%;
+  border-radius: 15px;
   background: var(--chip);
   color: var(--ink);
   font-size: 25px;
-  line-height: 1;
-  transition: transform 120ms ease;
-}
-
-.currency-sheet .search-box {
-  background: var(--canvas);
 }
 
 .currency-sheet .currency-list {
@@ -679,106 +668,102 @@ button:disabled {
   margin-top: 8px;
 }
 
-.currency-sheet .currency-symbol {
-  background: var(--canvas);
-}
-
 @media (min-width: 700px) {
   body {
     display: grid;
     min-height: 100dvh;
     place-items: center;
-    padding: 32px;
-    background: var(--parchment);
+    padding: 28px;
   }
 
   .app-shell {
     width: 430px;
-    min-height: min(850px, calc(100dvh - 64px));
+    min-height: min(850px, calc(100dvh - 56px));
     max-height: 850px;
-    border: 1px solid var(--control-border);
-    border-radius: 18px;
+    border: 1px solid var(--line);
+    border-radius: 32px;
   }
 
   .calculator-shell {
-    min-height: min(850px, calc(100dvh - 64px));
+    min-height: min(850px, calc(100dvh - 56px));
   }
 
   .sheet-backdrop {
     position: absolute;
-    border-radius: 18px;
+    border-radius: 32px;
   }
 
   .currency-sheet {
-    border-radius: 18px;
+    border-radius: 28px;
   }
 }
 
-@media (max-width: 419px) {
-  .onboarding-intro h1 {
-    font-size: 34px;
-  }
-}
-
-@media (max-height: 740px) {
+@media (max-width: 374px) {
   .calculator-shell {
-    padding: max(8px, env(safe-area-inset-top)) 14px max(8px, env(safe-area-inset-bottom));
+    padding-inline: 12px;
+  }
+
+  .currency-row {
+    grid-template-columns: minmax(0, 1fr) 122px;
+  }
+
+  .currency-badge {
+    width: 42px;
+    height: 42px;
+    flex-basis: 42px;
+  }
+
+  .currency-label strong {
+    font-size: 18px;
+  }
+}
+
+@media (max-height: 720px) {
+  .calculator-shell {
+    gap: 7px;
+    padding-top: max(8px, env(safe-area-inset-top));
+    padding-bottom: max(8px, env(safe-area-inset-bottom));
   }
 
   .app-header {
-    min-height: 40px;
+    min-height: 44px;
   }
 
-  .currency-switcher {
-    margin: 6px 0 8px;
+  .exchange-card {
+    padding-block: 10px;
   }
 
-  .currency-switcher > button:not(.swap-button) {
-    min-height: 54px;
-    padding-block: 4px;
+  .currency-row {
+    min-height: 60px;
   }
 
-  .converter-card {
-    margin-inline: -14px;
+  .currency-badge {
+    width: 42px;
+    height: 42px;
+    flex-basis: 42px;
   }
 
-  .amount-header {
-    padding: 10px 20px 0;
+  .exchange-divider {
+    grid-template-columns: 1fr 34px 1fr;
   }
 
-  .amount-header button {
-    min-height: 30px;
-  }
-
-  .amount-value {
-    padding: 0 20px 10px;
-    font-size: 44px;
-  }
-
-  .conversion-result {
-    min-height: 84px;
-    padding: 10px 20px 12px;
-  }
-
-  .conversion-result strong {
-    font-size: 32px;
+  .swap-button {
+    width: 34px;
+    height: 34px;
   }
 
   .rate-status {
-    min-height: 28px;
+    min-height: 22px;
   }
 
-  .keypad-topline {
-    min-height: 40px;
-    padding-bottom: 2px;
-  }
-
-  .key-grid {
-    gap: 6px;
+  .keypad-card {
+    min-height: 300px;
+    padding-block: 8px 10px;
   }
 
   .key-grid button {
-    min-height: 44px;
+    min-height: 50px;
+    font-size: 30px;
   }
 }
 
@@ -788,7 +773,6 @@ button:disabled {
   *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
-    scroll-behavior: auto !important;
     transition-duration: 0.01ms !important;
   }
 }

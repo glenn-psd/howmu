@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { headers } from "next/headers";
 import "./globals.css";
 
-const themeScript = `(()=>{try{const saved=localStorage.getItem("howmu:theme");const theme=saved==="light"||saved==="dark"?saved:matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";document.documentElement.dataset.theme=theme;document.documentElement.style.colorScheme=theme}catch{}})()`;
+const themeScript = `(()=>{try{const saved=localStorage.getItem("howmu:theme");const theme=saved==="light"||saved==="dark"?saved:"dark";document.documentElement.dataset.theme=theme;document.documentElement.style.colorScheme=theme}catch{}})()`;
 
 export async function generateMetadata(): Promise<Metadata> {
   const requestHeaders = await headers();
@@ -21,7 +21,7 @@ export async function generateMetadata(): Promise<Metadata> {
       title: "HOWMU 하무",
       description: "결제하기 전에, 얼마인지부터.",
       type: "website",
-      images: [{ url: `${origin}/og.png`, width: 1732, height: 908, alt: "howmu? Know before you pay." }],
+      images: [{ url: `${origin}/og.png`, width: 1734, height: 907, alt: "howmu? Know before you pay." }],
     },
     twitter: {
       card: "summary_large_image",
@@ -37,7 +37,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   viewportFit: "cover",
-  themeColor: "#f5f5f7",
+  themeColor: "#050608",
 };
 
 export default function RootLayout({
