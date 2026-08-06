@@ -544,26 +544,10 @@ button:disabled {
   font-size: 12px;
 }
 
-.keypad-topline > div {
-  display: flex;
-  gap: 4px;
-}
-
-.keypad-topline button {
-  min-width: 44px;
-  min-height: 44px;
-  padding: 0 8px;
-  border: 0;
-  background: transparent;
-  color: var(--action);
-  font-size: 12px;
-  transition: transform 120ms ease;
-}
-
 .key-grid {
   display: grid;
   flex: 1;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   grid-template-rows: repeat(4, 1fr);
   gap: 4px;
 }
@@ -584,6 +568,17 @@ button:disabled {
 .key-grid button:active {
   background: var(--pressed);
   color: var(--action);
+}
+
+.key-grid .operator-key {
+  color: var(--action);
+  font-size: clamp(36px, 9vw, 44px);
+  font-weight: 350;
+}
+
+.key-grid .delete-key {
+  font-size: 15px;
+  font-weight: 500;
 }
 
 .sheet-backdrop {

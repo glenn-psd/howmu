@@ -18,6 +18,8 @@ export type KeypadKey =
   | "clear"
   | "backspace";
 
+export type Operator = "÷" | "×" | "−" | "+";
+
 export function applyKey(current: string, key: KeypadKey): string {
   if (key === "clear") return "";
   if (key === "backspace") return current.slice(0, -1);
@@ -41,6 +43,21 @@ export function convertAmount(amount: string, rate: number | null): number | nul
   if (!amount || rate === null) return null;
   const parsed = Number(amount);
   return Number.isFinite(parsed) ? parsed * rate : null;
+}
+
+export function applyOperator(left: number, right: number, operator: Operator): string | null {
+  const value = operator === "+"
+    ? left + right
+    : operator === "−"
+      ? left - right
+      : operator === "×"
+        ? left * right
+        : right === 0 ? NaN : left / right;
+
+  if (!Number.isFinite(value) || value < 0) return null;
+  const result = Math.round((value + Number.EPSILON) * 100) / 100;
+  const formatted = result.toFixed(2).replace(/\.?0+$/, "");
+  return formatted.split(".")[0].length <= MAX_INTEGER_DIGITS ? formatted : null;
 }
 
 export function isRateFresh(fetchedAt: number, now = Date.now()): boolean {

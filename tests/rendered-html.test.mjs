@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { applyKey, convertAmount, isRateFresh } from "../app/calculator.ts";
+import { applyKey, applyOperator, convertAmount, isRateFresh } from "../app/calculator.ts";
 
 async function render() {
   const workerUrl = new URL("../dist/server/index.js", import.meta.url);
@@ -35,6 +35,11 @@ test("숫자 입력 규칙과 즉시 환산이 안정적이다", () => {
   assert.equal(applyKey("430", "clear"), "");
   assert.equal(convertAmount("430", 41.25), 17737.5);
   assert.equal(convertAmount("", 41.25), null);
+  assert.equal(applyOperator(100, 20, "+"), "120");
+  assert.equal(applyOperator(100, 20, "−"), "80");
+  assert.equal(applyOperator(12, 3, "×"), "36");
+  assert.equal(applyOperator(10, 4, "÷"), "2.5");
+  assert.equal(applyOperator(10, 0, "÷"), null);
 });
 
 test("환율은 6시간 동안 최신으로 취급한다", () => {

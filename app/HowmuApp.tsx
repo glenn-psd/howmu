@@ -3,10 +3,12 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   applyKey,
+  applyOperator,
   convertAmount,
   formatInput,
   isRateFresh,
   type KeypadKey,
+  type Operator,
 } from "./calculator";
 
 type Currency = {
@@ -51,7 +53,12 @@ const FALLBACK_CURRENCIES: Currency[] = [
 ];
 
 const POPULAR_CODES = ["THB", "JPY", "USD", "VND", "EUR", "TWD"];
-const KEYPAD: KeypadKey[] = ["1", "2", "3", "4", "5", "6", "7", "8", "9", ".", "0", "00"];
+const KEYPAD: (KeypadKey | Operator)[] = [
+  "1", "2", "3", "÷",
+  "4", "5", "6", "×",
+  "7", "8", "9", "−",
+  ".", "0", "backspace", "+",
+];
 
 const displayNames =
   typeof Intl.DisplayNames === "function"
@@ -199,6 +206,8 @@ export default function HowmuApp() {
   const [home, setHome] = useState("KRW");
   const [travel, setTravel] = useState("");
   const [amount, setAmount] = useState("");
+  const [pendingCalculation, setPendingCalculation] = useState<{ value: number; operator: Operator } | null>(null);
+  const [replaceAmount, setReplaceAmount] = useState(false);
   const [currencies, setCurrencies] = useState<Currency[]>(FALLBACK_CURRENCIES);
   const [rate, setRate] = useState<Rate | null>(null);
   const [refreshing, setRefreshing] = useState(false);
@@ -358,6 +367,8 @@ export default function HowmuApp() {
     setPicker(null);
     setQuery("");
     setAmount("");
+    setPendingCalculation(null);
+    setReplaceAmount(false);
   };
 
   const openPicker = (target: PickerTarget) => {
@@ -366,7 +377,25 @@ export default function HowmuApp() {
   };
 
   const pressKey = (key: KeypadKey) => {
-    setAmount((current) => applyKey(current, key));
+    if (key === "clear" || key === "backspace") {
+      setPendingCalculation(null);
+      setReplaceAmount(false);
+    }
+    setAmount((current) => applyKey(replaceAmount && key !== "clear" && key !== "backspace" ? "" : current, key));
+    if (key !== "clear" && key !== "backspace") setReplaceAmount(false);
+  };
+
+  const pressOperator = (operator: Operator) => {
+    if (!amount) return;
+    const current = Number(amount);
+    const result = pendingCalculation && !replaceAmount
+      ? applyOperator(pendingCalculation.value, current, pendingCalculation.operator)
+      : amount;
+    if (result === null) return;
+    const value = Number(result);
+    setAmount(result);
+    setPendingCalculation({ value, operator });
+    setReplaceAmount(true);
   };
 
   const toggleTheme = () => {
@@ -472,6 +501,8 @@ export default function HowmuApp() {
               setTravel(home);
               setHome(travel);
               setAmount("");
+              setPendingCalculation(null);
+              setReplaceAmount(false);
             }}
           >
             ⇅
@@ -502,16 +533,19 @@ export default function HowmuApp() {
 
       <section className="keypad keypad-card" aria-label="숫자 패드">
         <div className="keypad-topline">
-          <span>현지 가격</span>
-          <div>
-            <button type="button" onClick={() => pressKey("backspace")} disabled={!amount} aria-label="한 자리 삭제">삭제</button>
-            <button type="button" onClick={() => pressKey("clear")} disabled={!amount}>초기화</button>
-          </div>
+          <span>{pendingCalculation ? `${formatInput(String(pendingCalculation.value))} ${pendingCalculation.operator}` : "현지 가격"}</span>
         </div>
         <div className="key-grid">
           {KEYPAD.map((key) => (
-            <button key={key} type="button" onClick={() => pressKey(key)} aria-label={key === "." ? "소수점" : key}>
-              {key}
+            <button
+              className={key === "÷" || key === "×" || key === "−" || key === "+" ? "operator-key" : key === "backspace" ? "delete-key" : ""}
+              key={key}
+              type="button"
+              onClick={() => key === "÷" || key === "×" || key === "−" || key === "+" ? pressOperator(key) : pressKey(key)}
+              disabled={(key === "backspace" || key === "÷" || key === "×" || key === "−" || key === "+") && !amount}
+              aria-label={key === "." ? "소수점" : key === "backspace" ? "한 자리 삭제" : key}
+            >
+              {key === "backspace" ? "삭제" : key}
             </button>
           ))}
         </div>
