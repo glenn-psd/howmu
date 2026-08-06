@@ -21,6 +21,7 @@ test("HOWMU 첫 화면을 서버 렌더링한다", async () => {
   assert.match(html, /<title>HOWMU 하무 – 해외여행 현지 가격 확인<\/title>/i);
   assert.match(html, /howmu/);
   assert.match(html, /불러오는 중/);
+  assert.match(html, /howmu:theme/);
   assert.doesNotMatch(html, /codex-preview|react-loading-skeleton/i);
 });
 
@@ -41,4 +42,3 @@ test("환율은 6시간 동안 최신으로 취급한다", () => {
   assert.equal(isRateFresh(now - 5 * 60 * 60 * 1000, now), true);
   assert.equal(isRateFresh(now - 7 * 60 * 60 * 1000, now), false);
 });
-

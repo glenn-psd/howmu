@@ -24,10 +24,12 @@ type Rate = {
 };
 
 type PickerTarget = "home" | "travel";
+type Theme = "light" | "dark";
 
 const API = "https://api.frankfurter.dev/v2";
 const PREFS_KEY = "howmu:preferences";
 const CURRENCIES_KEY = "howmu:currencies";
+const THEME_KEY = "howmu:theme";
 
 const FALLBACK_CURRENCIES: Currency[] = [
   { iso_code: "THB", name: "Thai Baht", symbol: "฿" },
@@ -86,6 +88,12 @@ function validRate(value: unknown, base: string, quote: string): value is Rate {
 
 function rateKey(base: string, quote: string) {
   return `howmu:rate:${base}:${quote}`;
+}
+
+function applyTheme(theme: Theme) {
+  document.documentElement.dataset.theme = theme;
+  document.documentElement.style.colorScheme = theme;
+  document.querySelector('meta[name="theme-color"]')?.setAttribute("content", theme === "dark" ? "#000000" : "#f5f5f7");
 }
 
 function formatMoney(value: number | null, currency: string): string {
@@ -175,8 +183,19 @@ function Brand() {
   );
 }
 
+function ThemeToggle({ theme, onToggle }: { theme: Theme; onToggle: () => void }) {
+  const label = theme === "dark" ? "라이트 모드로 전환" : "다크 모드로 전환";
+
+  return (
+    <button className="theme-toggle" type="button" aria-label={label} title={label} onClick={onToggle}>
+      <span aria-hidden="true">{theme === "dark" ? "☀︎" : "☾"}</span>
+    </button>
+  );
+}
+
 export default function HowmuApp() {
   const [ready, setReady] = useState(false);
+  const [theme, setTheme] = useState<Theme>("light");
   const [home, setHome] = useState("KRW");
   const [travel, setTravel] = useState("");
   const [amount, setAmount] = useState("");
@@ -192,6 +211,11 @@ export default function HowmuApp() {
   useEffect(() => {
     const preferences = safeRead<{ home?: string; travel?: string }>(PREFS_KEY);
     const cachedCurrencies = safeRead<Currency[]>(CURRENCIES_KEY);
+    const savedTheme = localStorage.getItem(THEME_KEY);
+    const initialTheme: Theme = savedTheme === "light" || savedTheme === "dark"
+      ? savedTheme
+      : window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    applyTheme(initialTheme);
 
     queueMicrotask(() => {
       if (preferences?.home) setHome(preferences.home);
@@ -199,6 +223,7 @@ export default function HowmuApp() {
       if (Array.isArray(cachedCurrencies) && cachedCurrencies.length) {
         setCurrencies(cachedCurrencies);
       }
+      setTheme(initialTheme);
       setOnline(navigator.onLine);
       setReady(true);
     });
@@ -344,6 +369,13 @@ export default function HowmuApp() {
     setAmount((current) => applyKey(current, key));
   };
 
+  const toggleTheme = () => {
+    const next = theme === "dark" ? "light" : "dark";
+    applyTheme(next);
+    localStorage.setItem(THEME_KEY, next);
+    setTheme(next);
+  };
+
   if (!ready) {
     return (
       <main className="app-shell loading-shell">
@@ -358,7 +390,10 @@ export default function HowmuApp() {
       <main className="app-shell onboarding-shell">
         <header className="onboarding-header">
           <Brand />
-          <p>HOWMU 하무</p>
+          <div className="header-actions">
+            <p>HOWMU 하무</p>
+            <ThemeToggle theme={theme} onToggle={toggleTheme} />
+          </div>
         </header>
 
         <section className="onboarding-intro">
@@ -406,7 +441,10 @@ export default function HowmuApp() {
     <main className="app-shell calculator-shell">
       <header className="app-header">
         <Brand />
-        <span className="header-caption">결제하기 전에, 얼마인지부터.</span>
+        <div className="header-actions">
+          <span className="header-caption">결제하기 전에, 얼마인지부터.</span>
+          <ThemeToggle theme={theme} onToggle={toggleTheme} />
+        </div>
       </header>
 
       <section className="currency-switcher" aria-label="통화 설정">
