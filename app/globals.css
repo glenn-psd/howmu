@@ -1,13 +1,18 @@
 :root {
-  --paper: #f7f3ec;
-  --surface: #fffdf9;
-  --ink: #171a1d;
-  --muted: #74756f;
-  --line: #e7e1d7;
-  --lime: #d8ff54;
-  --purple: #635bff;
-  --card: #202426;
-  --shadow: 0 24px 80px rgba(47, 43, 35, 0.15);
+  --action: #0066cc;
+  --action-focus: #0071e3;
+  --action-dark: #2997ff;
+  --ink: #1d1d1f;
+  --ink-soft: #333333;
+  --muted: #7a7a7a;
+  --hairline: #e0e0e0;
+  --divider: #f0f0f0;
+  --canvas: #ffffff;
+  --parchment: #f5f5f7;
+  --pearl: #fafafc;
+  --tile: #272729;
+  --tile-soft: #2a2a2c;
+  --chip: rgba(210, 210, 215, 0.64);
 }
 
 * {
@@ -18,9 +23,13 @@ html,
 body {
   min-height: 100%;
   margin: 0;
-  background: var(--paper);
+  background: var(--parchment);
   color: var(--ink);
-  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", "Noto Sans KR", sans-serif;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Apple SD Gothic Neo", sans-serif;
+  font-size: 17px;
+  font-weight: 400;
+  line-height: 1.47;
+  letter-spacing: -0.022em;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -31,13 +40,22 @@ input {
 
 button {
   color: inherit;
+  cursor: pointer;
   -webkit-tap-highlight-color: transparent;
+}
+
+button:active:not(:disabled) {
+  transform: scale(0.95);
 }
 
 button:focus-visible,
 input:focus-visible {
-  outline: 3px solid rgba(99, 91, 255, 0.35);
+  outline: 2px solid var(--action-focus);
   outline-offset: 2px;
+}
+
+button:disabled {
+  opacity: 0.32;
 }
 
 .app-shell {
@@ -46,35 +64,32 @@ input:focus-visible {
   min-height: 100dvh;
   margin: 0 auto;
   overflow: hidden;
-  background: var(--surface);
+  background: var(--canvas);
 }
 
 .brand {
   display: inline-flex;
   align-items: baseline;
   color: var(--ink);
-  font-size: 28px;
-  font-weight: 850;
-  letter-spacing: -1.8px;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: -0.035em;
   line-height: 1;
 }
 
 .brand b {
-  display: inline-grid;
-  width: 24px;
-  height: 24px;
-  margin-left: 2px;
-  place-items: center;
-  border-radius: 50%;
-  background: var(--lime);
-  font-size: 19px;
-  font-weight: 900;
+  width: auto;
+  height: auto;
+  margin-left: 1px;
+  background: transparent;
+  color: var(--action);
+  font-size: inherit;
+  font-weight: 600;
 }
 
 .loading-shell {
-  display: grid;
-  padding: max(28px, env(safe-area-inset-top)) 24px;
-  place-items: start;
+  padding: max(24px, env(safe-area-inset-top)) 20px;
 }
 
 .loading-mark {
@@ -82,28 +97,31 @@ input:focus-visible {
   top: 50%;
   left: 50%;
   display: grid;
-  width: 76px;
-  height: 76px;
+  width: 72px;
+  height: 72px;
   transform: translate(-50%, -50%);
   place-items: center;
   border-radius: 50%;
-  background: var(--lime);
-  font-size: 48px;
-  font-weight: 900;
+  background: var(--action);
+  color: white;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
+  font-size: 42px;
+  font-weight: 600;
   animation: breathe 1.2s ease-in-out infinite alternate;
 }
 
 @keyframes breathe {
-  to { transform: translate(-50%, -50%) scale(1.08) rotate(5deg); }
+  to { transform: translate(-50%, -50%) scale(0.96); opacity: 0.86; }
 }
 
 .onboarding-shell {
-  padding: max(24px, env(safe-area-inset-top)) 20px max(20px, env(safe-area-inset-bottom));
+  padding: max(20px, env(safe-area-inset-top)) 20px max(20px, env(safe-area-inset-bottom));
 }
 
 .onboarding-header,
 .app-header {
   display: flex;
+  min-height: 44px;
   align-items: center;
   justify-content: space-between;
 }
@@ -111,95 +129,108 @@ input:focus-visible {
 .onboarding-header p {
   margin: 0;
   color: var(--muted);
-  font-size: 13px;
-  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: -0.01em;
 }
 
 .onboarding-intro {
-  padding: 52px 4px 34px;
+  padding: 48px 4px 44px;
+  text-align: center;
 }
 
 .eyebrow {
   display: inline-block;
-  margin-bottom: 13px;
-  color: var(--purple);
-  font-size: 12px;
-  font-weight: 850;
-  letter-spacing: 0.7px;
-  text-transform: uppercase;
+  margin-bottom: 12px;
+  color: var(--action);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
 }
 
 .onboarding-intro h1 {
   margin: 0;
-  font-size: clamp(34px, 9vw, 42px);
-  font-weight: 850;
-  letter-spacing: -2.2px;
-  line-height: 1.14;
+  color: var(--ink);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
+  font-size: clamp(34px, 10vw, 40px);
+  font-weight: 600;
+  letter-spacing: -0.035em;
+  line-height: 1.1;
 }
 
 .onboarding-intro p {
   margin: 20px 0 0;
   color: var(--muted);
-  font-size: 15px;
-  line-height: 1.6;
+  font-size: 17px;
+  line-height: 1.47;
 }
 
 .setup-card {
-  padding: 20px 16px 8px;
-  border: 1px solid var(--line);
-  border-radius: 28px 28px 0 0;
-  background: white;
-  box-shadow: 0 -8px 40px rgba(49, 44, 35, 0.06);
+  margin: 0 -20px -20px;
+  padding: 24px 20px max(16px, env(safe-area-inset-bottom));
+  border: 0;
+  border-radius: 0;
+  background: var(--parchment);
 }
 
 .setup-title-row {
   display: flex;
+  min-height: 72px;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 18px;
-  padding: 0 6px;
+  margin-bottom: 17px;
+  padding: 12px 17px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 18px;
+  background: var(--canvas);
 }
 
 .setup-title-row div {
   display: grid;
-  gap: 4px;
-}
-
-.setup-title-row span,
-.setup-title-row strong {
-  font-size: 12px;
+  gap: 2px;
 }
 
 .setup-title-row span {
   color: var(--muted);
+  font-size: 12px;
+}
+
+.setup-title-row strong {
+  font-size: 17px;
+  font-weight: 600;
 }
 
 .setup-title-row b {
-  padding: 9px 12px;
-  border-radius: 12px;
-  background: var(--lime);
-  font-size: 13px;
+  min-width: 60px;
+  padding: 8px 14px;
+  border-radius: 9999px;
+  background: var(--action);
+  color: white;
+  font-size: 14px;
+  font-weight: 400;
+  text-align: center;
 }
 
 .setup-card h2 {
-  margin: 24px 6px 10px;
-  font-size: 13px;
+  margin: 24px 4px 8px;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: -0.014em;
 }
 
 .search-box {
   display: flex;
-  min-height: 50px;
+  height: 48px;
   align-items: center;
-  gap: 10px;
-  padding: 0 15px;
-  border: 1px solid var(--line);
-  border-radius: 16px;
-  background: #faf8f3;
+  gap: 8px;
+  padding: 0 17px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 9999px;
+  background: var(--canvas);
 }
 
 .search-box span {
   color: var(--muted);
-  font-size: 23px;
+  font-size: 20px;
   line-height: 1;
 }
 
@@ -209,36 +240,37 @@ input:focus-visible {
   outline: 0;
   background: transparent;
   color: var(--ink);
-  font-size: 15px;
+  font-size: 17px;
+  letter-spacing: -0.022em;
 }
 
 .search-box input::placeholder {
-  color: #aaa69e;
+  color: #8e8e93;
 }
 
 .currency-list {
   display: grid;
-  max-height: min(400px, 43dvh);
+  max-height: min(420px, 45dvh);
   overflow: auto;
   overscroll-behavior: contain;
 }
 
 .currency-option {
   display: grid;
-  min-height: 64px;
+  min-height: 68px;
   grid-template-columns: 40px minmax(0, 1fr) auto;
   align-items: center;
   gap: 12px;
-  padding: 9px 6px;
+  padding: 8px 4px;
   border: 0;
-  border-bottom: 1px solid #f0ece5;
+  border-bottom: 1px solid var(--hairline);
   background: transparent;
   text-align: left;
-  cursor: pointer;
+  transition: transform 120ms ease, background-color 120ms ease;
 }
 
 .currency-option:active {
-  background: #f7f4ed;
+  background: rgba(0, 0, 0, 0.035);
 }
 
 .currency-symbol {
@@ -246,21 +278,23 @@ input:focus-visible {
   width: 40px;
   height: 40px;
   place-items: center;
-  border-radius: 14px;
-  background: var(--paper);
-  font-size: 16px;
-  font-weight: 800;
+  border-radius: 50%;
+  background: var(--canvas);
+  color: var(--ink);
+  font-size: 15px;
+  font-weight: 600;
 }
 
 .currency-copy {
   display: grid;
   min-width: 0;
-  gap: 3px;
+  gap: 1px;
 }
 
 .currency-copy strong {
   overflow: hidden;
-  font-size: 14px;
+  font-size: 15px;
+  font-weight: 600;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -268,15 +302,16 @@ input:focus-visible {
 .currency-copy small {
   overflow: hidden;
   color: var(--muted);
-  font-size: 11px;
+  font-size: 12px;
+  letter-spacing: -0.01em;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .currency-option > b {
-  color: #575951;
-  font-size: 12px;
-  letter-spacing: 0.3px;
+  color: var(--action);
+  font-size: 14px;
+  font-weight: 400;
 }
 
 .empty-search {
@@ -290,15 +325,15 @@ input:focus-visible {
   display: flex;
   min-height: 100dvh;
   flex-direction: column;
-  padding: max(22px, env(safe-area-inset-top)) 18px max(18px, env(safe-area-inset-bottom));
+  padding: max(16px, env(safe-area-inset-top)) 18px max(12px, env(safe-area-inset-bottom));
 }
 
 .header-caption {
-  max-width: 140px;
+  max-width: 150px;
   color: var(--muted);
-  font-size: 11px;
-  font-weight: 650;
-  line-height: 1.35;
+  font-size: 12px;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
   text-align: right;
 }
 
@@ -306,20 +341,26 @@ input:focus-visible {
   display: grid;
   grid-template-columns: 1fr 44px 1fr;
   align-items: center;
-  gap: 8px;
-  margin: 23px 0 14px;
+  gap: 4px;
+  margin: 12px 0;
+  padding: 4px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 18px;
+  background: var(--parchment);
 }
 
 .currency-switcher > button:not(.swap-button) {
   display: grid;
   min-width: 0;
-  min-height: 72px;
-  gap: 2px;
-  padding: 10px 12px;
-  border: 1px solid var(--line);
-  border-radius: 18px;
-  background: white;
+  min-height: 64px;
+  align-content: center;
+  gap: 1px;
+  padding: 6px 10px;
+  border: 0;
+  border-radius: 14px;
+  background: var(--canvas);
   text-align: left;
+  transition: transform 120ms ease;
 }
 
 .currency-switcher span,
@@ -327,13 +368,15 @@ input:focus-visible {
   overflow: hidden;
   color: var(--muted);
   font-size: 10px;
+  letter-spacing: -0.006em;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .currency-switcher strong {
-  font-size: 18px;
-  letter-spacing: -0.3px;
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.022em;
 }
 
 .swap-button {
@@ -343,109 +386,115 @@ input:focus-visible {
   place-items: center;
   border: 0;
   border-radius: 50%;
-  background: var(--lime);
-  font-size: 20px;
-  font-weight: 800;
+  background: var(--action);
+  color: white;
+  font-size: 19px;
+  font-weight: 400;
+  transition: transform 120ms ease;
 }
 
 .converter-card {
+  margin-inline: -18px;
   overflow: hidden;
-  border-radius: 28px;
-  background: var(--card);
+  border-radius: 0;
+  background: var(--tile);
   color: white;
-  box-shadow: 0 16px 36px rgba(28, 32, 33, 0.18);
 }
 
 .amount-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 20px 22px 4px;
+  padding: 20px 24px 4px;
 }
 
 .amount-header > span {
-  color: var(--lime);
-  font-size: 16px;
-  font-weight: 800;
+  color: var(--action-dark);
+  font-size: 17px;
+  font-weight: 600;
 }
 
 .amount-header button {
   min-height: 36px;
-  padding: 0 5px;
+  padding: 0 4px;
   border: 0;
   background: transparent;
-  color: #b5b8b5;
-  font-size: 11px;
-}
-
-button:disabled {
-  opacity: 0.35;
+  color: var(--action-dark);
+  font-size: 14px;
 }
 
 .amount-value {
   overflow: hidden;
-  padding: 4px 22px 22px;
-  font-size: clamp(48px, 14vw, 64px);
-  font-weight: 750;
-  letter-spacing: -3px;
-  line-height: 1.1;
+  padding: 4px 24px 24px;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
+  font-size: clamp(48px, 14vw, 60px);
+  font-weight: 300;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.04em;
+  line-height: 1.07;
   text-align: right;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .amount-value.amount-small {
-  font-size: clamp(38px, 11vw, 52px);
+  font-size: clamp(38px, 11vw, 50px);
 }
 
 .conversion-result {
   display: grid;
-  min-height: 118px;
+  min-height: 112px;
   align-content: center;
-  gap: 3px;
-  padding: 18px 22px 20px;
-  background: var(--lime);
-  color: var(--ink);
+  gap: 2px;
+  padding: 17px 24px 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  background: var(--tile-soft);
+  color: white;
 }
 
 .conversion-result span {
-  font-size: 11px;
-  font-weight: 750;
+  color: #cccccc;
+  font-size: 12px;
 }
 
 .conversion-result strong {
   overflow: hidden;
-  font-size: clamp(32px, 10vw, 43px);
-  font-weight: 850;
-  letter-spacing: -2.2px;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
+  font-size: clamp(34px, 10vw, 42px);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.035em;
+  line-height: 1.12;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .conversion-result small {
-  color: #4c522b;
-  font-size: 11px;
+  color: var(--action-dark);
+  font-size: 12px;
+  letter-spacing: -0.01em;
 }
 
 .rate-status {
   display: flex;
-  min-height: 34px;
+  min-height: 36px;
   align-items: center;
   justify-content: center;
   gap: 7px;
   color: var(--muted);
-  font-size: 10px;
+  font-size: 11px;
+  letter-spacing: -0.008em;
 }
 
 .status-dot {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: #33b873;
+  background: #34c759;
 }
 
 .rate-stale .status-dot {
-  background: #ee8e46;
+  background: #ff9500;
 }
 
 .keypad {
@@ -458,21 +507,23 @@ button:disabled {
   min-height: 44px;
   align-items: center;
   justify-content: space-between;
-  padding: 0 5px 5px;
+  padding: 0 4px 4px;
 }
 
 .keypad-topline span {
   color: var(--muted);
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .keypad-topline button {
-  width: 52px;
-  min-height: 44px;
+  width: 44px;
+  height: 44px;
   border: 0;
-  border-radius: 14px;
-  background: #efebe3;
-  font-size: 21px;
+  border-radius: 50%;
+  background: var(--chip);
+  color: var(--action);
+  font-size: 20px;
+  transition: transform 120ms ease;
 }
 
 .key-grid {
@@ -482,18 +533,20 @@ button:disabled {
 }
 
 .key-grid button {
-  min-height: clamp(52px, 7.5dvh, 64px);
+  min-height: clamp(52px, 7.5dvh, 62px);
   border: 0;
   border-radius: 18px;
-  background: #f1eee7;
-  font-size: 22px;
-  font-weight: 680;
-  cursor: pointer;
+  background: var(--parchment);
+  color: var(--ink);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
+  font-size: 24px;
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+  transition: transform 120ms ease, background-color 120ms ease;
 }
 
 .key-grid button:active {
-  transform: scale(0.96);
-  background: #e5e0d7;
+  background: #e8e8ed;
 }
 
 .sheet-backdrop {
@@ -503,8 +556,9 @@ button:disabled {
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  background: rgba(17, 20, 21, 0.42);
-  backdrop-filter: blur(5px);
+  background: rgba(0, 0, 0, 0.32);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
 }
 
 .sheet-dismiss {
@@ -519,43 +573,44 @@ button:disabled {
   z-index: 1;
   width: min(100%, 430px);
   max-height: min(760px, 91dvh);
-  padding: 10px 18px max(16px, env(safe-area-inset-bottom));
+  padding: 10px 20px max(16px, env(safe-area-inset-bottom));
   overflow: hidden;
-  border-radius: 30px 30px 0 0;
-  background: var(--surface);
-  box-shadow: 0 -30px 90px rgba(10, 10, 10, 0.28);
+  border-radius: 18px 18px 0 0;
+  background: rgba(245, 245, 247, 0.94);
   animation: rise 180ms ease-out;
 }
 
 @keyframes rise {
-  from { transform: translateY(22px); opacity: 0; }
+  from { transform: translateY(18px); opacity: 0; }
 }
 
 .sheet-handle {
-  width: 42px;
+  width: 36px;
   height: 5px;
-  margin: 0 auto 18px;
-  border-radius: 10px;
-  background: #d7d2c9;
+  margin: 0 auto 17px;
+  border-radius: 9999px;
+  background: #c7c7cc;
 }
 
 .currency-sheet header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  margin-bottom: 18px;
+  margin-bottom: 17px;
 }
 
 .currency-sheet header span {
-  color: var(--purple);
-  font-size: 11px;
-  font-weight: 800;
+  color: var(--action);
+  font-size: 12px;
 }
 
 .currency-sheet h2 {
-  margin: 5px 0 0;
-  font-size: 24px;
-  letter-spacing: -1px;
+  margin: 4px 0 0;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
+  font-size: 28px;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 1.14;
 }
 
 .currency-sheet header button {
@@ -565,14 +620,24 @@ button:disabled {
   place-items: center;
   border: 0;
   border-radius: 50%;
-  background: #efebe3;
-  font-size: 27px;
+  background: var(--chip);
+  color: var(--ink);
+  font-size: 25px;
   line-height: 1;
+  transition: transform 120ms ease;
+}
+
+.currency-sheet .search-box {
+  background: var(--canvas);
 }
 
 .currency-sheet .currency-list {
   max-height: min(530px, 60dvh);
-  margin-top: 10px;
+  margin-top: 8px;
+}
+
+.currency-sheet .currency-symbol {
+  background: var(--canvas);
 }
 
 @media (min-width: 700px) {
@@ -581,19 +646,15 @@ button:disabled {
     min-height: 100dvh;
     place-items: center;
     padding: 32px;
-    background:
-      radial-gradient(circle at 18% 16%, rgba(216, 255, 84, 0.32), transparent 28%),
-      radial-gradient(circle at 82% 80%, rgba(99, 91, 255, 0.15), transparent 31%),
-      var(--paper);
+    background: var(--parchment);
   }
 
   .app-shell {
     width: 430px;
     min-height: min(850px, calc(100dvh - 64px));
     max-height: 850px;
-    border: 1px solid rgba(47, 43, 35, 0.08);
-    border-radius: 36px;
-    box-shadow: var(--shadow);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 18px;
   }
 
   .calculator-shell {
@@ -602,44 +663,62 @@ button:disabled {
 
   .sheet-backdrop {
     position: absolute;
-    border-radius: 36px;
+    border-radius: 18px;
   }
 
   .currency-sheet {
-    border-radius: 30px 30px 36px 36px;
+    border-radius: 18px;
+  }
+}
+
+@media (max-width: 419px) {
+  .onboarding-intro h1 {
+    font-size: 34px;
   }
 }
 
 @media (max-height: 740px) {
   .calculator-shell {
-    padding: max(10px, env(safe-area-inset-top)) 14px max(10px, env(safe-area-inset-bottom));
+    padding: max(8px, env(safe-area-inset-top)) 14px max(8px, env(safe-area-inset-bottom));
+  }
+
+  .app-header {
+    min-height: 40px;
   }
 
   .currency-switcher {
-    margin: 8px 0;
+    margin: 6px 0 8px;
   }
 
   .currency-switcher > button:not(.swap-button) {
-    min-height: 56px;
-    padding-block: 6px;
+    min-height: 54px;
+    padding-block: 4px;
+  }
+
+  .converter-card {
+    margin-inline: -14px;
   }
 
   .amount-header {
-    padding-top: 12px;
+    padding: 10px 20px 0;
   }
 
   .amount-header button {
     min-height: 30px;
   }
 
-  .conversion-result {
-    min-height: 88px;
-    padding-block: 12px;
+  .amount-value {
+    padding: 0 20px 10px;
+    font-size: 44px;
   }
 
-  .amount-value {
-    padding-bottom: 10px;
-    font-size: 44px;
+  .conversion-result {
+    min-height: 84px;
+    padding: 10px 20px 12px;
+  }
+
+  .conversion-result strong {
+    font-size: 32px;
   }
 
   .rate-status {
@@ -664,9 +743,9 @@ button:disabled {
   *,
   *::before,
   *::after {
-    scroll-behavior: auto !important;
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
     transition-duration: 0.01ms !important;
   }
 }

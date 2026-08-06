@@ -19,7 +19,7 @@ export async function generateMetadata(): Promise<Metadata> {
       title: "HOWMU 하무",
       description: "결제하기 전에, 얼마인지부터.",
       type: "website",
-      images: [{ url: `${origin}/og.png`, width: 1731, height: 909, alt: "howmu? Know before you pay." }],
+      images: [{ url: `${origin}/og.png`, width: 1732, height: 908, alt: "howmu? Know before you pay." }],
     },
     twitter: {
       card: "summary_large_image",
@@ -35,7 +35,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   viewportFit: "cover",
-  themeColor: "#f7f3ec",
+  themeColor: "#f5f5f7",
 };
 
 export default function RootLayout({
