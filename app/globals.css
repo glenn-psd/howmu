@@ -1,4 +1,45 @@
+@font-face {
+  font-family: "Inter Variable";
+  src: url("../node_modules/@fontsource-variable/inter/files/inter-latin-wght-normal.woff2") format("woff2-variations");
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Pretendard";
+  src: url("../node_modules/@fontsource/pretendard/files/pretendard-latin-400-normal.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Pretendard";
+  src: url("../node_modules/@fontsource/pretendard/files/pretendard-latin-500-normal.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Pretendard";
+  src: url("../node_modules/@fontsource/pretendard/files/pretendard-latin-600-normal.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Pretendard";
+  src: url("../node_modules/@fontsource/pretendard/files/pretendard-latin-700-normal.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+}
+
 :root {
+  --font-sans: "Inter Variable", "Pretendard", system-ui, sans-serif;
   --action: #357ff3;
   --action-soft: #e7f0ff;
   --ink: #17181d;
@@ -38,7 +79,7 @@ body {
   margin: 0;
   background: var(--canvas);
   color: var(--ink);
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Apple SD Gothic Neo", sans-serif;
+  font-family: var(--font-sans);
   font-size: 17px;
   font-weight: 400;
   line-height: 1.45;
@@ -84,7 +125,7 @@ button:disabled {
   display: inline-flex;
   align-items: baseline;
   color: var(--ink);
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
+  font-family: var(--font-sans);
   font-size: 24px;
   font-weight: 700;
   letter-spacing: -0.045em;
@@ -184,7 +225,7 @@ button:disabled {
 
 .onboarding-intro h1 {
   margin: 0;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
+  font-family: var(--font-sans);
   font-size: clamp(36px, 10vw, 43px);
   font-weight: 700;
   letter-spacing: -0.05em;
@@ -430,7 +471,7 @@ button:disabled {
 .amount-value,
 .conversion-result strong {
   overflow: hidden;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
+  font-family: var(--font-sans);
   font-variant-numeric: tabular-nums;
   text-align: right;
   text-overflow: ellipsis;
@@ -558,7 +599,7 @@ button:disabled {
   border-radius: 18px;
   background: transparent;
   color: var(--ink);
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
+  font-family: var(--font-sans);
   font-size: clamp(30px, 8vw, 38px);
   font-weight: 350;
   font-variant-numeric: tabular-nums;
