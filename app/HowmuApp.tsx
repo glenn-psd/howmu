@@ -202,8 +202,8 @@ function BottomNav({ screen, onChange }: { screen: Screen; onChange: (screen: Sc
         <span>계산기</span>
       </button>
       <button type="button" className={screen === "settings" ? "active" : ""} onClick={() => onChange("settings")}>
-        <span className="nav-icon" aria-hidden="true">•••</span>
-        <span>설정</span>
+        <span className="nav-icon nav-icon-profile" aria-hidden="true" />
+        <span>마이</span>
       </button>
     </nav>
   );
@@ -479,7 +479,6 @@ export default function HowmuApp() {
           <>
             <header className="product-header">
               <Brand />
-              <button className="round-button" type="button" aria-label="설정 열기" onClick={() => setScreen("settings")}>•••</button>
             </header>
 
             <section className="calculator-intro">
@@ -547,7 +546,10 @@ export default function HowmuApp() {
           </>
         ) : (
           <>
-            <header className="settings-header"><h1>설정</h1></header>
+            <header className="settings-header">
+              <span>내 정보와 앱 설정</span>
+              <h1>마이</h1>
+            </header>
 
             <section className="account-card">
               <div className="account-avatar" aria-hidden="true">{provider ? provider.slice(0, 1) : "?"}</div>
