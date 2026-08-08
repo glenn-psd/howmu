@@ -105,7 +105,7 @@ function applyTheme(theme: Theme) {
   document.documentElement.style.colorScheme = theme;
   document
     .querySelector('meta[name="theme-color"]')
-    ?.setAttribute("content", theme === "dark" ? "#17191f" : "#f2f4f6");
+    ?.setAttribute("content", theme === "dark" ? "#000000" : "#f5f5f7");
 }
 
 function formatMoney(value: number | null, currency: string): string {
@@ -211,7 +211,6 @@ function BottomNav({ screen, onChange }: { screen: Screen; onChange: (screen: Sc
 
 export default function HowmuApp() {
   const [ready, setReady] = useState(false);
-  const [setupStarted, setSetupStarted] = useState(false);
   const [screen, setScreen] = useState<Screen>("calculator");
   const [theme, setTheme] = useState<Theme>("light");
   const [home, setHome] = useState("KRW");
@@ -428,33 +427,13 @@ export default function HowmuApp() {
     );
   }
 
-  if (!travel && !setupStarted) {
-    return (
-      <main className="app-shell welcome-shell">
-        <header className="simple-header"><Brand /></header>
-        <section className="welcome-copy">
-          <span className="eyebrow">Know before you pay.</span>
-          <h1>여행지 가격을<br />가장 간단하게.</h1>
-          <p>가격표의 숫자만 입력하세요.<br />하무가 바로 익숙한 금액으로 알려드려요.</p>
-        </section>
-        <div className="welcome-proof"><span aria-hidden="true">✓</span> 계정 없이 바로 사용할 수 있어요</div>
-        <button className="primary-button" type="button" onClick={() => setSetupStarted(true)}>하무 시작하기</button>
-      </main>
-    );
-  }
-
   if (!travel) {
     return (
       <main className="app-shell setup-shell">
-        <header className="simple-header">
-          <button className="back-button" type="button" aria-label="이전 화면" onClick={() => setSetupStarted(false)}>‹</button>
-          <span>여행 설정</span>
-          <span className="header-spacer" />
-        </header>
+        <header className="simple-header"><Brand /></header>
         <section className="setup-intro">
-          <span className="step-label">1 / 1</span>
-          <h1>어디로 여행가세요?</h1>
-          <p>가격표에 적힌 현지 통화를 골라주세요.</p>
+          <h1>여행지 통화</h1>
+          <p>가격표에 적힌 통화를 선택하세요.</p>
         </section>
         <label className="search-box setup-search">
           <span aria-hidden="true">⌕</span>
@@ -480,11 +459,6 @@ export default function HowmuApp() {
             <header className="product-header">
               <Brand />
             </header>
-
-            <section className="calculator-intro">
-              <span>{currencyName(travelCurrency)} 기준</span>
-              <h1>이 가격,<br />얼마일까요?</h1>
-            </section>
 
             <section className="exchange-card" aria-label="통화 설정" aria-live="polite">
               <div className="currency-row">
@@ -519,15 +493,15 @@ export default function HowmuApp() {
                   <small>{rate ? `1 ${travel} ≈ ${formatRate(rate.rate, home)}` : "환율을 불러오는 중"}</small>
                 </div>
               </div>
-            </section>
 
-            <div className={`rate-status ${!online || rateError ? "rate-stale" : ""}`} role="status">
-              <span className="status-dot" aria-hidden="true" />{rateStatus}
-            </div>
+              <div className={`rate-status ${!online || rateError ? "rate-stale" : ""}`} role="status">
+                <span className="status-dot" aria-hidden="true" />{rateStatus}
+              </div>
+            </section>
 
             <section className="keypad-card" aria-label="숫자 패드">
               <div className="keypad-topline">
-                <span>{pendingCalculation ? `${formatInput(String(pendingCalculation.value))} ${pendingCalculation.operator}` : "현지 가격을 입력하세요"}</span>
+                <span>{pendingCalculation ? `${formatInput(String(pendingCalculation.value))} ${pendingCalculation.operator}` : "현지 가격"}</span>
                 {amount && <button type="button" onClick={() => pressKey("clear")}>전체 삭제</button>}
               </div>
               <div className="key-grid">
@@ -546,10 +520,7 @@ export default function HowmuApp() {
           </>
         ) : (
           <>
-            <header className="settings-header">
-              <span>내 정보와 앱 설정</span>
-              <h1>마이</h1>
-            </header>
+            <header className="settings-header"><h1>마이</h1></header>
 
             <section className="account-card">
               <div className="account-avatar" aria-hidden="true">{provider ? provider.slice(0, 1) : "?"}</div>
