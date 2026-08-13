@@ -155,7 +155,9 @@ button:disabled { cursor: default; }
 
 .currency-option:active { background: var(--pressed); }
 .currency-option.fixed { cursor: default; }
-.currency-symbol { display: grid; width: 44px; height: 44px; place-items: center; border-radius: 50%; background: var(--background); color: var(--text-dim); font-family: "Inter Variable", sans-serif; font-size: 14px; font-weight: 600; }
+.currency-symbol { display: grid; width: 44px; height: 44px; place-items: center; overflow: hidden; border-radius: 50%; background: var(--background); color: var(--text-dim); font-family: "Inter Variable", sans-serif; font-size: 14px; font-weight: 600; }
+.currency-symbol img { width: 44px; height: 44px; object-fit: contain; }
+.flag-code { font-family: "Inter Variable", sans-serif; font-size: 14px; font-weight: 600; }
 .currency-option.selected .currency-symbol,
 .currency-option.fixed .currency-symbol { color: var(--blue); }
 .currency-copy { display: grid; min-width: 0; gap: 1px; }

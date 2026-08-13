@@ -58,6 +58,26 @@ const CURRENCY_NAMES: Record<string, string> = {
   THB: "태국 바트",
   USD: "미국 달러",
 };
+// Figma의 Flag 컴포넌트와 동일하게 48px 원형 배지 안에 국가별 국기를 넣는다.
+// 통화 코드가 API에서 추가되더라도 자산이 없으면 코드 배지로 안전하게 폴백한다.
+const FLAG_FILES: Record<string, string> = {
+  AUD: "/icons/flag-au.svg",
+  CAD: "/icons/flag-ca.svg",
+  CNY: "/icons/flag-cn.svg",
+  EUR: "/icons/flag-eu.svg",
+  GBP: "/icons/flag-gb.svg",
+  HKD: "/icons/flag-hk.svg",
+  IDR: "/icons/flag-id.svg",
+  JPY: "/icons/flag-jp.svg",
+  KRW: "/icons/flag-kr.svg",
+  MYR: "/icons/flag-my.svg",
+  PHP: "/icons/flag-ph.svg",
+  SGD: "/icons/flag-sg.svg",
+  THB: "/icons/flag-th.svg",
+  TWD: "/icons/flag-tw.svg",
+  USD: "/icons/flag-us.svg",
+  VND: "/icons/flag-vn.svg",
+};
 const displayNames =
   typeof Intl.DisplayNames === "function"
     ? new Intl.DisplayNames(["ko"], { type: "currency" })
@@ -67,6 +87,11 @@ function currencyName(currency: Currency): string {
   if (CURRENCY_NAMES[currency.iso_code]) return CURRENCY_NAMES[currency.iso_code];
   const localized = displayNames?.of(currency.iso_code);
   return localized && localized !== currency.iso_code ? localized : currency.name;
+}
+
+function Flag({ code, className = "" }: { code: string; className?: string }) {
+  const src = FLAG_FILES[code];
+  return src ? <img className={className} src={src} alt="" /> : <span className="flag-code">{code.slice(0, 2)}</span>;
 }
 
 function storageGet(key: string): string | null {
@@ -138,7 +163,7 @@ function CurrencyOption({
   return (
     <button className={`currency-option ${selected ? "selected" : ""}`} type="button" onClick={onSelect}>
       <span className="currency-symbol" aria-hidden="true">
-        {currency.iso_code.slice(0, 2)}
+        <Flag code={currency.iso_code} />
       </span>
       <span className="currency-copy">
         <strong>{currency.iso_code} · {currencyName(currency)}</strong>
@@ -451,7 +476,7 @@ export default function HowmuApp() {
           <section className="setup-section">
             <h2 className="list-title">내 기준 통화</h2>
             <div className="currency-option fixed" aria-label="KRW 대한민국 원, 기본 통화">
-              <span className="currency-symbol" aria-hidden="true">KR</span>
+              <span className="currency-symbol" aria-hidden="true"><Flag code="KRW" /></span>
               <span className="currency-copy"><strong>KRW · 대한민국 원</strong><small>기본 통화</small></span>
               <img className="currency-row-icon" src="/icons/chevron-right.svg" alt="" />
             </div>
@@ -513,8 +538,8 @@ export default function HowmuApp() {
         <section className="exchange-card" aria-label="통화 설정">
               <div className="currency-row">
                 <button className="currency-select" type="button" onClick={() => openPicker("travel")}>
-                  <span className={`currency-badge ${travel === "THB" ? "" : "currency-badge-code"}`} aria-hidden="true">
-                    {travel === "THB" ? <img src="/icons/flag-th.svg" alt="" /> : travel.slice(0, 2)}
+                  <span className={`currency-badge ${FLAG_FILES[travel] ? "" : "currency-badge-code"}`} aria-hidden="true">
+                    <Flag code={travel} />
                   </span>
                   <span className="currency-label"><strong>{travelCurrency.iso_code}</strong></span>
                   <span className="chevron" aria-hidden="true"><img src="/icons/chevron-down.svg" alt="" /></span>
@@ -524,8 +549,8 @@ export default function HowmuApp() {
 
               <div className="currency-row">
                 <button className="currency-select" type="button" onClick={() => openPicker("home")}>
-                  <span className={`currency-badge ${home === "KRW" ? "" : "currency-badge-code"}`} aria-hidden="true">
-                    {home === "KRW" ? <img src="/icons/flag-kr.svg" alt="" /> : home.slice(0, 2)}
+                  <span className={`currency-badge ${FLAG_FILES[home] ? "" : "currency-badge-code"}`} aria-hidden="true">
+                    <Flag code={home} />
                   </span>
                   <span className="currency-label"><strong>{homeCurrency.iso_code}</strong></span>
                   <span className="chevron" aria-hidden="true"><img src="/icons/chevron-down.svg" alt="" /></span>
