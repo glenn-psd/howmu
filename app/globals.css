@@ -45,8 +45,11 @@
 
 html,
 body {
+  height: 100%;
   min-height: 100%;
   margin: 0;
+  overflow: hidden;
+  overscroll-behavior: none;
   background: var(--background);
   color: var(--text);
   font-family: var(--font-sans);
@@ -76,6 +79,7 @@ button:disabled { cursor: default; }
   min-height: 100dvh;
   margin: 0 auto;
   overflow: hidden;
+  overscroll-behavior: none;
   border-radius: 18px;
   background: var(--background);
 }
