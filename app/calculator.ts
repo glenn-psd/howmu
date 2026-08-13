@@ -20,6 +20,13 @@ export type KeypadKey =
 
 export type Operator = "÷" | "×" | "−" | "+";
 
+export const KEYPAD: readonly (KeypadKey | Operator)[] = [
+  "1", "2", "3", "÷",
+  "4", "5", "6", "×",
+  "7", "8", "9", "−",
+  ".", "0", "backspace", "+",
+];
+
 export function applyKey(current: string, key: KeypadKey): string {
   if (key === "clear") return "";
   if (key === "backspace") return current.slice(0, -1);
@@ -61,7 +68,7 @@ export function applyOperator(left: number, right: number, operator: Operator): 
 }
 
 export function isRateFresh(fetchedAt: number, now = Date.now()): boolean {
-  return fetchedAt > 0 && now - fetchedAt < RATE_TTL_MS;
+  return Number.isFinite(fetchedAt) && fetchedAt > 0 && fetchedAt <= now && now - fetchedAt < RATE_TTL_MS;
 }
 
 export function formatInput(amount: string): string {

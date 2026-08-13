@@ -1,9 +1,36 @@
-const CACHE_NAME = "howmu-shell-v5";
-const APP_SHELL = ["/", "/manifest.webmanifest", "/icon-192.png", "/icon-512.png"];
+const CACHE_NAME = "howmu-shell-v7";
+const STATIC_SHELL = [
+  "/manifest.webmanifest",
+  "/icon-192.png",
+  "/icon-512.png",
+  "/icons/check.svg",
+  "/icons/chevron-down.svg",
+  "/icons/chevron-right.svg",
+  "/icons/chevron-up.svg",
+  "/icons/flag-kr.svg",
+  "/icons/flag-th.svg",
+  "/icons/search.svg",
+  "/icons/sun.svg",
+];
+
+async function precacheShell() {
+  const cache = await caches.open(CACHE_NAME);
+  await cache.addAll(STATIC_SHELL);
+
+  const response = await fetch(new Request("/", { cache: "reload" }));
+  if (!response.ok) throw new Error("app shell request failed");
+  await cache.put("/", response.clone());
+
+  const html = await response.text();
+  const assetUrls = [...html.matchAll(/(?:src|href)=["']([^"']+)["']/g)]
+    .map((match) => new URL(match[1], self.location.origin))
+    .filter((url) => url.origin === self.location.origin && url.pathname !== "/")
+    .map((url) => url.href);
+  await cache.addAll([...new Set(assetUrls)]);
+}
 
 self.addEventListener("install", (event) => {
-  event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_SHELL)));
-  self.skipWaiting();
+  event.waitUntil(precacheShell().then(() => self.skipWaiting()));
 });
 
 self.addEventListener("activate", (event) => {
@@ -22,28 +49,32 @@ self.addEventListener("fetch", (event) => {
 
   if (request.mode === "navigate") {
     event.respondWith(
-      fetch(request)
-        .then((response) => {
-          const copy = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put("/", copy));
+      (async () => {
+        try {
+          const response = await fetch(request);
+          if (response.ok) {
+            const cache = await caches.open(CACHE_NAME);
+            await cache.put("/", response.clone());
+          }
           return response;
-        })
-        .catch(() => caches.match("/")),
+        } catch {
+          return (await caches.match("/")) ?? Response.error();
+        }
+      })(),
     );
     return;
   }
 
   event.respondWith(
-    caches.match(request).then(
-      (cached) =>
-        cached ||
-        fetch(request).then((response) => {
-          if (response.ok) {
-            const copy = response.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put(request, copy));
-          }
-          return response;
-        }),
-    ),
+    (async () => {
+      const cached = await caches.match(request);
+      if (cached) return cached;
+      const response = await fetch(request);
+      if (response.ok) {
+        const cache = await caches.open(CACHE_NAME);
+        await cache.put(request, response.clone());
+      }
+      return response;
+    })(),
   );
 });

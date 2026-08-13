@@ -1,5 +1,7 @@
 "use client";
 
+/* eslint-disable @next/next/no-img-element -- Figma에서 내려받은 20px SVG 원본을 그대로 사용한다. */
+
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   applyKey,
@@ -7,34 +9,27 @@ import {
   convertAmount,
   formatInput,
   isRateFresh,
+  KEYPAD,
   type KeypadKey,
   type Operator,
 } from "./calculator";
+import {
+  parseCurrencies,
+  parsePreferences,
+  parseRate,
+  parseRateResponse,
+  selectCurrencyPair,
+  type Currency,
+  type PickerTarget,
+  type Rate,
+} from "./howmu-data";
 
-type Currency = {
-  iso_code: string;
-  name: string;
-  symbol?: string;
-};
-
-type Rate = {
-  base: string;
-  quote: string;
-  rate: number;
-  date: string;
-  fetchedAt: number;
-};
-
-type PickerTarget = "home" | "travel";
-type Screen = "calculator" | "settings";
 type Theme = "light" | "dark";
-type Provider = "Apple" | "Google" | "Kakao";
 
 const API = "https://api.frankfurter.dev/v2";
 const PREFS_KEY = "howmu:preferences";
 const CURRENCIES_KEY = "howmu:currencies";
 const THEME_KEY = "howmu:theme";
-const PROFILE_KEY = "howmu:demo-profile";
 
 const FALLBACK_CURRENCIES: Currency[] = [
   { iso_code: "THB", name: "Thai Baht", symbol: "฿" },
@@ -55,45 +50,58 @@ const FALLBACK_CURRENCIES: Currency[] = [
   { iso_code: "KRW", name: "South Korean Won", symbol: "₩" },
 ];
 
-const POPULAR_CODES = ["THB", "JPY", "USD", "VND", "EUR", "TWD"];
-const KEYPAD: (KeypadKey | Operator)[] = [
-  "1", "2", "3", "÷",
-  "4", "5", "6", "×",
-  "7", "8", "9", "−",
-  ".", "0", "backspace", "+",
-];
-
+const POPULAR_CODES = ["THB", "JPY", "USD", "EUR", "VND", "TWD"];
+const CURRENCY_NAMES: Record<string, string> = {
+  EUR: "유로",
+  JPY: "일본 엔",
+  KRW: "대한민국 원",
+  THB: "태국 바트",
+  USD: "미국 달러",
+};
 const displayNames =
   typeof Intl.DisplayNames === "function"
     ? new Intl.DisplayNames(["ko"], { type: "currency" })
     : null;
 
 function currencyName(currency: Currency): string {
+  if (CURRENCY_NAMES[currency.iso_code]) return CURRENCY_NAMES[currency.iso_code];
   const localized = displayNames?.of(currency.iso_code);
   return localized && localized !== currency.iso_code ? localized : currency.name;
 }
 
-function safeRead<T>(key: string): T | null {
+function storageGet(key: string): string | null {
   try {
-    return JSON.parse(localStorage.getItem(key) ?? "null") as T | null;
+    return localStorage.getItem(key);
   } catch {
-    localStorage.removeItem(key);
     return null;
   }
 }
 
-function validRate(value: unknown, base: string, quote: string): value is Rate {
-  if (!value || typeof value !== "object") return false;
-  const candidate = value as Partial<Rate>;
-  return (
-    candidate.base === base &&
-    candidate.quote === quote &&
-    typeof candidate.rate === "number" &&
-    Number.isFinite(candidate.rate) &&
-    candidate.rate > 0 &&
-    typeof candidate.date === "string" &&
-    typeof candidate.fetchedAt === "number"
-  );
+function storageRemove(key: string) {
+  try {
+    localStorage.removeItem(key);
+  } catch {
+    // 저장소가 차단돼도 계산기는 메모리 상태로 계속 동작한다.
+  }
+}
+
+function storageWrite(key: string, value: unknown) {
+  try {
+    localStorage.setItem(key, typeof value === "string" ? value : JSON.stringify(value));
+  } catch {
+    // Safari 비공개 모드나 저장 공간 부족에서도 앱을 중단하지 않는다.
+  }
+}
+
+function safeRead(key: string): unknown {
+  const raw = storageGet(key);
+  if (raw === null) return null;
+  try {
+    return JSON.parse(raw) as unknown;
+  } catch {
+    storageRemove(key);
+    return null;
+  }
 }
 
 function rateKey(base: string, quote: string) {
@@ -111,42 +119,55 @@ function applyTheme(theme: Theme) {
 function formatMoney(value: number | null, currency: string): string {
   if (value === null) return "—";
   return new Intl.NumberFormat("ko-KR", {
-    style: "currency",
-    currency,
+    style: "decimal",
     maximumFractionDigits: currency === "KRW" ? 0 : 2,
   }).format(value);
 }
 
-function formatRate(value: number, currency: string): string {
-  return new Intl.NumberFormat("ko-KR", {
-    style: "currency",
-    currency,
-    maximumFractionDigits: currency === "KRW" ? 2 : 4,
-  }).format(value);
-}
-
-function CurrencyOption({ currency, onSelect }: { currency: Currency; onSelect: () => void }) {
+function CurrencyOption({
+  currency,
+  selected = false,
+  subtitle,
+  onSelect,
+}: {
+  currency: Currency;
+  selected?: boolean;
+  subtitle?: string;
+  onSelect: () => void;
+}) {
   return (
-    <button className="currency-option" type="button" onClick={onSelect}>
+    <button className={`currency-option ${selected ? "selected" : ""}`} type="button" onClick={onSelect}>
       <span className="currency-symbol" aria-hidden="true">
-        {currency.symbol || currency.iso_code.slice(0, 1)}
+        {currency.iso_code.slice(0, 2)}
       </span>
       <span className="currency-copy">
-        <strong>{currencyName(currency)}</strong>
-        <small>{currency.name}</small>
+        <strong>{currency.iso_code} · {currencyName(currency)}</strong>
+        <small>{subtitle ?? currency.name}</small>
       </span>
-      <b>{currency.iso_code}</b>
+      <span className="currency-row-icon" aria-hidden="true">
+        <img className={selected ? "check-glyph" : "chevron-right-glyph"} src={selected ? "/icons/check.svg" : "/icons/chevron-right.svg"} alt="" />
+      </span>
     </button>
   );
+}
+
+function currencySubtitle(code: string): string {
+  return code === "THB" ? "태국 · ไทย"
+    : code === "JPY" ? "일본 · 日本語"
+      : code === "USD" ? "미국 · English"
+        : code === "EUR" ? "유럽연합"
+          : "";
 }
 
 function CurrencyList({
   currencies,
   query,
+  selectedCode,
   onSelect,
 }: {
   currencies: Currency[];
   query: string;
+  selectedCode?: string;
   onSelect: (currency: Currency) => void;
 }) {
   const results = useMemo(() => {
@@ -168,7 +189,7 @@ function CurrencyList({
           }
           return currencyName(a).localeCompare(currencyName(b), "ko");
         });
-    return source.slice(0, needle ? 80 : 24);
+    return source.slice(0, needle ? 80 : 4);
   }, [currencies, query]);
 
   if (!results.length) return <p className="empty-search">일치하는 통화를 찾지 못했어요.</p>;
@@ -179,6 +200,8 @@ function CurrencyList({
         <CurrencyOption
           key={currency.iso_code}
           currency={currency}
+          selected={currency.iso_code === selectedCode}
+          subtitle={currencySubtitle(currency.iso_code) || currency.name}
           onSelect={() => onSelect(currency)}
         />
       ))}
@@ -194,24 +217,17 @@ function Brand() {
   );
 }
 
-function BottomNav({ screen, onChange }: { screen: Screen; onChange: (screen: Screen) => void }) {
+function ExchangeMenu() {
   return (
-    <nav className="bottom-nav" aria-label="주요 메뉴">
-      <button type="button" className={screen === "calculator" ? "active" : ""} onClick={() => onChange("calculator")}>
-        <span className="nav-icon" aria-hidden="true">₩</span>
-        <span>계산기</span>
-      </button>
-      <button type="button" className={screen === "settings" ? "active" : ""} onClick={() => onChange("settings")}>
-        <span className="nav-icon nav-icon-profile" aria-hidden="true" />
-        <span>마이</span>
-      </button>
-    </nav>
+    <div className="exchange-menu" aria-label="환율 계산기">
+      <span>환율</span>
+      <img src="/icons/chevron-up.svg" alt="" />
+    </div>
   );
 }
 
 export default function HowmuApp() {
   const [ready, setReady] = useState(false);
-  const [screen, setScreen] = useState<Screen>("calculator");
   const [theme, setTheme] = useState<Theme>("light");
   const [home, setHome] = useState("KRW");
   const [travel, setTravel] = useState("");
@@ -220,58 +236,44 @@ export default function HowmuApp() {
   const [replaceAmount, setReplaceAmount] = useState(false);
   const [currencies, setCurrencies] = useState<Currency[]>(FALLBACK_CURRENCIES);
   const [rate, setRate] = useState<Rate | null>(null);
-  const [refreshing, setRefreshing] = useState(false);
   const [rateError, setRateError] = useState(false);
-  const [online, setOnline] = useState(true);
+  const [rateAttempt, setRateAttempt] = useState(0);
   const [picker, setPicker] = useState<PickerTarget | null>(null);
-  const [loginOpen, setLoginOpen] = useState(false);
-  const [provider, setProvider] = useState<Provider | null>(null);
   const [query, setQuery] = useState("");
+  const [draftTravel, setDraftTravel] = useState("THB");
   const searchRef = useRef<HTMLInputElement>(null);
+  const pickerRef = useRef<HTMLElement | null>(null);
+  const pickerOpenerRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
-    const preferences = safeRead<{ home?: string; travel?: string }>(PREFS_KEY);
-    const cachedCurrencies = safeRead<Currency[]>(CURRENCIES_KEY);
-    const savedProvider = safeRead<{ provider?: Provider }>(PROFILE_KEY)?.provider ?? null;
-    const savedTheme = localStorage.getItem(THEME_KEY);
-    const initialTheme: Theme = savedTheme === "light" || savedTheme === "dark" ? savedTheme : "light";
+    const cachedCurrencies = parseCurrencies(safeRead(CURRENCIES_KEY));
+    const initialCurrencies = parseCurrencies([...cachedCurrencies, ...FALLBACK_CURRENCIES]);
+    const preferences = parsePreferences(safeRead(PREFS_KEY), initialCurrencies.map((currency) => currency.iso_code));
+    const savedTheme = storageGet(THEME_KEY);
+    const initialTheme: Theme = savedTheme === "light" || savedTheme === "dark" ? savedTheme : "dark";
     applyTheme(initialTheme);
 
     queueMicrotask(() => {
-      if (preferences?.home) setHome(preferences.home);
-      if (preferences?.travel) setTravel(preferences.travel);
-      if (Array.isArray(cachedCurrencies) && cachedCurrencies.length) setCurrencies(cachedCurrencies);
-      setProvider(savedProvider);
+      setHome(preferences.home);
+      setTravel(preferences.travel);
+      if (cachedCurrencies.length) setCurrencies(initialCurrencies);
       setTheme(initialTheme);
-      setOnline(navigator.onLine);
       setReady(true);
     });
 
-    const handleOnline = () => setOnline(true);
-    const handleOffline = () => setOnline(false);
-    window.addEventListener("online", handleOnline);
-    window.addEventListener("offline", handleOffline);
-
-    fetch(`${API}/currencies`)
+    let active = true;
+    const controller = new AbortController();
+    fetch(`${API}/currencies`, { signal: controller.signal })
       .then((response) => {
         if (!response.ok) throw new Error("currency request failed");
         return response.json();
       })
       .then((data: unknown) => {
-        if (!Array.isArray(data)) return;
-        const next = data.filter(
-          (item): item is Currency =>
-            Boolean(
-              item &&
-                typeof item === "object" &&
-                typeof item.iso_code === "string" &&
-                /^[A-Z]{3}$/.test(item.iso_code) &&
-                typeof item.name === "string",
-            ),
-        );
-        if (next.length) {
-          setCurrencies(next);
-          localStorage.setItem(CURRENCIES_KEY, JSON.stringify(next));
+        const next = parseCurrencies(data);
+        if (active && next.length) {
+          const merged = parseCurrencies([...next, ...FALLBACK_CURRENCIES]);
+          setCurrencies(merged);
+          storageWrite(CURRENCIES_KEY, merged);
         }
       })
       .catch(() => undefined);
@@ -281,34 +283,38 @@ export default function HowmuApp() {
     }
 
     return () => {
-      window.removeEventListener("online", handleOnline);
-      window.removeEventListener("offline", handleOffline);
+      active = false;
+      controller.abort();
     };
   }, []);
 
   useEffect(() => {
     if (!ready || !home || !travel) return;
-    localStorage.setItem(PREFS_KEY, JSON.stringify({ home, travel }));
+    storageWrite(PREFS_KEY, { home, travel });
+    let active = true;
 
     if (home === travel) {
       queueMicrotask(() => {
+        if (!active) return;
         setRate({ base: travel, quote: home, rate: 1, date: new Date().toISOString().slice(0, 10), fetchedAt: Date.now() });
+        setRateError(false);
       });
-      return;
+      return () => { active = false; };
     }
 
     const storageKey = rateKey(travel, home);
-    const cached = safeRead<Rate>(storageKey);
-    const usableCache = validRate(cached, travel, home) ? cached : null;
+    const usableCache = parseRate(safeRead(storageKey), travel, home);
     queueMicrotask(() => {
+      if (!active) return;
       setRate(usableCache);
-      setRateError(false);
+      if (usableCache) setRateError(false);
     });
 
-    if (usableCache && isRateFresh(usableCache.fetchedAt)) return;
+    if (usableCache && isRateFresh(usableCache.fetchedAt)) {
+      return () => { active = false; };
+    }
 
     const controller = new AbortController();
-    queueMicrotask(() => setRefreshing(true));
 
     fetch(`${API}/rate/${travel}/${home}`, { signal: controller.signal })
       .then((response) => {
@@ -316,57 +322,68 @@ export default function HowmuApp() {
         return response.json();
       })
       .then((data: unknown) => {
-        const candidate = data as Partial<Rate>;
-        if (
-          candidate.base !== travel ||
-          candidate.quote !== home ||
-          typeof candidate.rate !== "number" ||
-          !Number.isFinite(candidate.rate) ||
-          candidate.rate <= 0 ||
-          typeof candidate.date !== "string"
-        ) throw new Error("invalid rate response");
-
-        const next: Rate = {
-          base: travel,
-          quote: home,
-          rate: candidate.rate,
-          date: candidate.date,
-          fetchedAt: Date.now(),
-        };
+        const next = parseRateResponse(data, travel, home);
+        if (!next) throw new Error("invalid rate response");
+        if (!active) return;
         setRate(next);
         setRateError(false);
-        localStorage.setItem(storageKey, JSON.stringify(next));
+        storageWrite(storageKey, next);
       })
       .catch((error: unknown) => {
-        if (!(error instanceof DOMException && error.name === "AbortError")) setRateError(true);
-      })
-      .finally(() => setRefreshing(false));
+        if (active && !(error && typeof error === "object" && "name" in error && error.name === "AbortError")) {
+          setRateError(true);
+        }
+      });
 
-    return () => controller.abort();
-  }, [home, ready, travel]);
+    return () => {
+      active = false;
+      controller.abort();
+    };
+  }, [home, rateAttempt, ready, travel]);
 
   useEffect(() => {
-    if (picker) requestAnimationFrame(() => searchRef.current?.focus());
+    if (!picker) return;
+    const opener = pickerOpenerRef.current;
+    requestAnimationFrame(() => searchRef.current?.focus());
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        setPicker(null);
+        return;
+      }
+      if (event.key !== "Tab") return;
+      const focusable = Array.from(
+        pickerRef.current?.querySelectorAll<HTMLElement>('button:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex="-1"])') ?? [],
+      );
+      if (!focusable.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      opener?.focus();
+    };
   }, [picker]);
 
   const homeCurrency = currencies.find((currency) => currency.iso_code === home) ?? { iso_code: home, name: home };
   const travelCurrency = currencies.find((currency) => currency.iso_code === travel) ?? { iso_code: travel, name: travel };
-  const converted = convertAmount(amount, rate?.rate ?? null);
+  const currentRate = rate?.base === travel && rate.quote === home ? rate : null;
+  const converted = convertAmount(amount, currentRate?.rate ?? null);
 
   const chooseCurrency = (currency: Currency, target: PickerTarget) => {
-    if (target === "travel") {
-      if (currency.iso_code === home && travel) {
-        setHome(travel);
-        setTravel(home);
-      } else {
-        setTravel(currency.iso_code);
-      }
-    } else if (currency.iso_code === travel) {
-      setTravel(home);
-      setHome(currency.iso_code);
-    } else {
-      setHome(currency.iso_code);
-    }
+    const next = selectCurrencyPair(home, travel, currency.iso_code, target);
+    setHome(next.home);
+    setTravel(next.travel);
+    setRate(null);
+    setRateError(false);
     setPicker(null);
     setQuery("");
     setAmount("");
@@ -375,6 +392,7 @@ export default function HowmuApp() {
   };
 
   const openPicker = (target: PickerTarget) => {
+    pickerOpenerRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     setQuery("");
     setPicker(target);
   };
@@ -403,19 +421,12 @@ export default function HowmuApp() {
   const toggleTheme = () => {
     const next = theme === "dark" ? "light" : "dark";
     applyTheme(next);
-    localStorage.setItem(THEME_KEY, next);
+    storageWrite(THEME_KEY, next);
     setTheme(next);
   };
 
-  const connectProvider = (nextProvider: Provider) => {
-    localStorage.setItem(PROFILE_KEY, JSON.stringify({ provider: nextProvider }));
-    setProvider(nextProvider);
-    setLoginOpen(false);
-  };
-
-  const disconnectProvider = () => {
-    localStorage.removeItem(PROFILE_KEY);
-    setProvider(null);
+  const retryRate = () => {
+    setRateAttempt((current) => current + 1);
   };
 
   if (!ready) {
@@ -428,177 +439,137 @@ export default function HowmuApp() {
   }
 
   if (!travel) {
+    const draftCurrency = currencies.find((currency) => currency.iso_code === draftTravel);
     return (
       <main className="app-shell setup-shell">
-        <header className="simple-header"><Brand /></header>
-        <section className="setup-intro">
-          <h1>여행지 통화</h1>
-          <p>가격표에 적힌 통화를 선택하세요.</p>
-        </section>
-        <label className="search-box setup-search">
-          <span aria-hidden="true">⌕</span>
-          <input ref={searchRef} value={query} onChange={(event) => setQuery(event.target.value)} placeholder="통화 또는 국가 검색" aria-label="여행지 통화 검색" />
-        </label>
-        <h2 className="list-title">{query ? "검색 결과" : "많이 찾는 여행지"}</h2>
-        <CurrencyList currencies={currencies} query={query} onSelect={(currency) => chooseCurrency(currency, "travel")} />
+        <div className="setup-content">
+          <section className="setup-intro">
+            <h1>여행지 통화를<br />선택하세요</h1>
+            <p>가격표에 표시된 통화를 고르면<br />원화로 바로 계산해드려요.</p>
+          </section>
+
+          <section className="setup-section">
+            <h2 className="list-title">내 기준 통화</h2>
+            <div className="currency-option fixed" aria-label="KRW 대한민국 원, 기본 통화">
+              <span className="currency-symbol" aria-hidden="true">KR</span>
+              <span className="currency-copy"><strong>KRW · 대한민국 원</strong><small>기본 통화</small></span>
+              <img className="currency-row-icon" src="/icons/chevron-right.svg" alt="" />
+            </div>
+          </section>
+
+          <section className="setup-section travel-section">
+            <h2 className="list-title">여행지 통화</h2>
+            <label className="search-box setup-search">
+              <img src="/icons/search.svg" alt="" />
+              <input ref={searchRef} value={query} onChange={(event) => setQuery(event.target.value)} placeholder="국가 또는 통화 검색" aria-label="여행지 통화 검색" />
+            </label>
+            {query ? (
+              <CurrencyList currencies={currencies.filter((currency) => currency.iso_code !== home)} query={query} selectedCode={draftTravel} onSelect={(currency) => {
+                setDraftTravel(currency.iso_code);
+                setQuery("");
+              }} />
+            ) : draftCurrency ? (
+              <CurrencyOption currency={draftCurrency} selected subtitle={currencySubtitle(draftCurrency.iso_code) || draftCurrency.name} onSelect={() => searchRef.current?.focus()} />
+            ) : null}
+          </section>
+        </div>
+
+        <button
+          className="setup-submit"
+          type="button"
+          disabled={!draftCurrency || draftCurrency.iso_code === home}
+          onClick={() => draftCurrency && chooseCurrency(draftCurrency, "travel")}
+        >계산기 시작하기</button>
       </main>
     );
   }
 
-  const rateStatus = !rate
-    ? refreshing ? "환율을 불러오는 중이에요" : "인터넷에 연결해 환율을 받아주세요"
-    : !online || rateError ? `저장된 ${rate.date} 환율을 사용 중이에요`
-    : refreshing ? "최신 환율을 확인하고 있어요"
-    : `${rate.date} 기준 환율이에요`;
+  if (!currentRate && rateError) {
+    return (
+      <main className="app-shell network-shell">
+        <div className="network-pill">환율 업데이트 대기</div>
+        <h1>인터넷 연결이<br />필요해요</h1>
+        <p className="network-description">첫 환율을 받으려면 한 번만 연결해 주세요.<br />이후에는 저장된 환율로 계산할 수 있어요.</p>
+        <section className="network-checklist">
+          <strong>확인할 사항</strong>
+          <p>Wi-Fi 또는 셀룰러 연결<br />날짜 및 시간 설정<br />잠시 후 다시 시도</p>
+        </section>
+        <p className="network-support">계속 문제가 발생하면 앱을 닫았다가 다시 열어주세요.</p>
+        <button className="network-retry" type="button" onClick={retryRate}>다시 시도</button>
+      </main>
+    );
+  }
 
   return (
     <main className="app-shell product-shell">
-      <div className="screen-content">
-        {screen === "calculator" ? (
-          <>
-            <header className="product-header">
-              <Brand />
-            </header>
+      <div className="screen-content" inert={picker ? true : undefined} aria-hidden={picker ? true : undefined}>
+        <header className="product-header">
+          <ExchangeMenu />
+          <button className="theme-button" type="button" onClick={toggleTheme} aria-label={theme === "dark" ? "라이트 모드로 전환" : "다크 모드로 전환"}>
+            <img src="/icons/sun.svg" alt="" />
+          </button>
+        </header>
 
-            <section className="exchange-card" aria-label="통화 설정" aria-live="polite">
+        <section className="exchange-card" aria-label="통화 설정">
               <div className="currency-row">
                 <button className="currency-select" type="button" onClick={() => openPicker("travel")}>
-                  <span className="currency-badge" aria-hidden="true">{travelCurrency.symbol || travelCurrency.iso_code.slice(0, 1)}</span>
-                  <span className="currency-label"><strong>{travelCurrency.iso_code}</strong><small>{currencyName(travelCurrency)}</small></span>
-                  <span className="chevron" aria-hidden="true">⌄</span>
+                  <span className={`currency-badge ${travel === "THB" ? "" : "currency-badge-code"}`} aria-hidden="true">
+                    {travel === "THB" ? <img src="/icons/flag-th.svg" alt="" /> : travel.slice(0, 2)}
+                  </span>
+                  <span className="currency-label"><strong>{travelCurrency.iso_code}</strong></span>
+                  <span className="chevron" aria-hidden="true"><img src="/icons/chevron-down.svg" alt="" /></span>
                 </button>
                 <div className={`amount-value ${amount.length > 9 ? "amount-small" : ""}`}>{formatInput(amount)}</div>
               </div>
 
-              <div className="exchange-divider">
-                <span />
-                <button className="swap-button" type="button" aria-label="두 통화 교환" onClick={() => {
-                  setTravel(home);
-                  setHome(travel);
-                  setAmount("");
-                  setPendingCalculation(null);
-                  setReplaceAmount(false);
-                }}>⇅</button>
-                <span />
-              </div>
-
               <div className="currency-row">
                 <button className="currency-select" type="button" onClick={() => openPicker("home")}>
-                  <span className="currency-badge currency-badge-home" aria-hidden="true">{homeCurrency.symbol || homeCurrency.iso_code.slice(0, 1)}</span>
-                  <span className="currency-label"><strong>{homeCurrency.iso_code}</strong><small>{currencyName(homeCurrency)}</small></span>
-                  <span className="chevron" aria-hidden="true">⌄</span>
+                  <span className={`currency-badge ${home === "KRW" ? "" : "currency-badge-code"}`} aria-hidden="true">
+                    {home === "KRW" ? <img src="/icons/flag-kr.svg" alt="" /> : home.slice(0, 2)}
+                  </span>
+                  <span className="currency-label"><strong>{homeCurrency.iso_code}</strong></span>
+                  <span className="chevron" aria-hidden="true"><img src="/icons/chevron-down.svg" alt="" /></span>
                 </button>
-                <div className="conversion-result">
+                <div className="conversion-result" aria-live="polite" aria-atomic="true">
                   <strong>{formatMoney(converted, home)}</strong>
-                  <small>{rate ? `1 ${travel} ≈ ${formatRate(rate.rate, home)}` : "환율을 불러오는 중"}</small>
                 </div>
               </div>
+        </section>
 
-              <div className={`rate-status ${!online || rateError ? "rate-stale" : ""}`} role="status">
-                <span className="status-dot" aria-hidden="true" />{rateStatus}
-              </div>
-            </section>
-
-            <section className="keypad-card" aria-label="숫자 패드">
-              <div className="keypad-topline">
-                <span>{pendingCalculation ? `${formatInput(String(pendingCalculation.value))} ${pendingCalculation.operator}` : "현지 가격"}</span>
-                {amount && <button type="button" onClick={() => pressKey("clear")}>전체 삭제</button>}
-              </div>
+        <section className="keypad-card" aria-label="숫자 패드">
               <div className="key-grid">
-                {KEYPAD.map((key) => (
+                {KEYPAD.map((key) => {
+                  const disabled = (key === "backspace" || key === "÷" || key === "×" || key === "−" || key === "+") && !amount;
+                  return (
                   <button
-                    className={key === "÷" || key === "×" || key === "−" || key === "+" ? "operator-key" : key === "backspace" ? "delete-key" : ""}
+                    className={`${key === "÷" || key === "×" || key === "−" || key === "+" ? "operator-key" : key === "backspace" ? "delete-key" : ""} ${disabled ? "key-disabled" : ""}`}
                     key={key}
                     type="button"
                     onClick={() => key === "÷" || key === "×" || key === "−" || key === "+" ? pressOperator(key) : pressKey(key)}
-                    disabled={(key === "backspace" || key === "÷" || key === "×" || key === "−" || key === "+") && !amount}
+                    disabled={disabled}
                     aria-label={key === "." ? "소수점" : key === "backspace" ? "한 자리 삭제" : key}
                   >{key === "backspace" ? "삭제" : key}</button>
-                ))}
+                  );
+                })}
               </div>
-            </section>
-          </>
-        ) : (
-          <>
-            <header className="settings-header"><h1>마이</h1></header>
-
-            <section className="account-card">
-              <div className="account-avatar" aria-hidden="true">{provider ? provider.slice(0, 1) : "?"}</div>
-              <div className="account-copy">
-                <strong>{provider ? `${provider} 계정으로 연결됨` : "로그인하지 않고 사용 중"}</strong>
-                <p>{provider ? "여행 설정을 계정에 이어갈 준비가 됐어요." : "로그인하지 않아도 계산기는 계속 쓸 수 있어요."}</p>
-              </div>
-              {provider ? (
-                <button className="text-button" type="button" onClick={disconnectProvider}>연결 해제</button>
-              ) : (
-                <button className="small-primary" type="button" onClick={() => setLoginOpen(true)}>계정 연결</button>
-              )}
-            </section>
-
-            <section className="settings-section">
-              <h2>여행 설정</h2>
-              <button className="setting-row" type="button" onClick={() => openPicker("travel")}>
-                <span><b>여행지 통화</b><small>가격표에 적힌 통화</small></span><strong>{travel}</strong><i>›</i>
-              </button>
-              <button className="setting-row" type="button" onClick={() => openPicker("home")}>
-                <span><b>내 기준 통화</b><small>환산 결과로 볼 통화</small></span><strong>{home}</strong><i>›</i>
-              </button>
-            </section>
-
-            <section className="settings-section">
-              <h2>앱 설정</h2>
-              <button className="setting-row" type="button" role="switch" aria-checked={theme === "dark"} onClick={toggleTheme}>
-                <span><b>다크 모드</b><small>어두운 곳에서 편하게 보기</small></span>
-                <span className={`toggle ${theme === "dark" ? "on" : ""}`} aria-hidden="true"><i /></span>
-              </button>
-              <div className="setting-row static-row">
-                <span><b>환율 정보</b><small>{rateStatus}</small></span><span className={`mini-status ${!online || rateError ? "stale" : ""}`} />
-              </div>
-            </section>
-
-            <section className="settings-section">
-              <h2>HOWMU</h2>
-              <div className="setting-row static-row"><span><b>서비스 정보</b><small>HOWMU 하무 · 가격을 가장 빠르게 이해하는 방법</small></span><strong>POC</strong></div>
-              <div className="setting-row static-row"><span><b>개인정보</b><small>입력한 금액과 설정은 이 기기에만 저장돼요.</small></span></div>
-            </section>
-          </>
-        )}
+        </section>
       </div>
 
-      <BottomNav screen={screen} onChange={setScreen} />
-
       {picker && (
-        <div className="sheet-backdrop">
-          <button className="sheet-dismiss" type="button" aria-label="통화 선택 닫기" onClick={() => setPicker(null)} />
-          <section className="bottom-sheet currency-sheet" role="dialog" aria-modal="true" aria-labelledby="picker-title">
-            <div className="sheet-handle" aria-hidden="true" />
-            <header><div><span>{picker === "travel" ? "여행지 통화" : "내 기준 통화"}</span><h2 id="picker-title">어떤 통화를 사용할까요?</h2></div><button type="button" onClick={() => setPicker(null)} aria-label="닫기">×</button></header>
-            <label className="search-box"><span aria-hidden="true">⌕</span><input ref={searchRef} value={query} onChange={(event) => setQuery(event.target.value)} placeholder="통화 코드 또는 이름 검색" aria-label="통화 검색" /></label>
-            <CurrencyList currencies={currencies} query={query} onSelect={(currency) => chooseCurrency(currency, picker)} />
-          </section>
-        </div>
+        <section ref={pickerRef} className="picker-screen" role="dialog" aria-modal="true" aria-labelledby="picker-title">
+          <header className="picker-header">
+            <button type="button" onClick={() => setPicker(null)} aria-label="통화 선택 닫기">‹</button>
+          </header>
+          <h2 id="picker-title">{picker === "travel" ? "여행지 통화" : "내 기준 통화"}</h2>
+          <label className="search-box">
+            <img src="/icons/search.svg" alt="" />
+            <input ref={searchRef} value={query} onChange={(event) => setQuery(event.target.value)} placeholder="국가 또는 통화 검색" aria-label="통화 검색" />
+          </label>
+          <h3 className="list-title">{query ? "검색 결과" : "많이 찾는 통화"}</h3>
+          <CurrencyList currencies={currencies} query={query} selectedCode={picker === "travel" ? travel : home} onSelect={(currency) => chooseCurrency(currency, picker)} />
+        </section>
       )}
 
-      {loginOpen && (
-        <div className="sheet-backdrop">
-          <button className="sheet-dismiss" type="button" aria-label="계정 연결 닫기" onClick={() => setLoginOpen(false)} />
-          <section className="bottom-sheet login-sheet" role="dialog" aria-modal="true" aria-labelledby="login-title">
-            <div className="sheet-handle" aria-hidden="true" />
-            <span className="sheet-eyebrow">선택 사항이에요</span>
-            <h2 id="login-title">어떤 계정으로<br />이어갈까요?</h2>
-            <p>로그인하면 다른 기기에서도 여행 설정을 이어갈 수 있어요.</p>
-            <div className="provider-list">
-              {(["Apple", "Google", "Kakao"] as Provider[]).map((item) => (
-                <button className={`provider-button provider-${item.toLowerCase()}`} type="button" key={item} onClick={() => connectProvider(item)}>
-                  <span aria-hidden="true">{item.slice(0, 1)}</span>{item}로 계속하기
-                </button>
-              ))}
-            </div>
-            <button className="guest-button" type="button" onClick={() => setLoginOpen(false)}>로그인 없이 계속 사용</button>
-            <small className="poc-note">현재 POC에서는 선택한 계정 정보가 이 기기에만 저장돼요. 실제 OAuth 연동은 정식 앱 단계에서 연결합니다.</small>
-          </section>
-        </div>
-      )}
     </main>
   );
 }

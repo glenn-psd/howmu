@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { headers } from "next/headers";
 import "./globals.css";
 
-const themeScript = `(()=>{try{const saved=localStorage.getItem("howmu:theme");const theme=saved==="light"||saved==="dark"?saved:"light";document.documentElement.dataset.theme=theme;document.documentElement.style.colorScheme=theme}catch{}})()`;
+const themeScript = `(()=>{let theme="dark";try{const saved=localStorage.getItem("howmu:theme");if(saved==="light"||saved==="dark")theme=saved}catch{}document.documentElement.dataset.theme=theme;document.documentElement.style.colorScheme=theme})()`;
 
 export async function generateMetadata(): Promise<Metadata> {
   const requestHeaders = await headers();
@@ -37,7 +37,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   viewportFit: "cover",
-  themeColor: "#f5f5f7",
+  themeColor: "#000000",
 };
 
 export default function RootLayout({
